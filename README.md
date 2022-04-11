@@ -5,16 +5,21 @@ this app is hosted on heroku
 https://spring-boot-issuetracker.herokuapp.com/
 
 findall -get
+
 https://spring-boot-issuetracker.herokuapp.com/api/issues
 
 findbyid -get
+
 https://spring-boot-issuetracker.herokuapp.com/api/issues/{issueid}
 
 deletebyid -delete
+
 https://spring-boot-issuetracker.herokuapp.com/api/issues/{issueid}
 
 create -post
+
 https://spring-boot-issuetracker.herokuapp.com/api/issues
+
     {
         "title": "",
         "description": "",
@@ -23,9 +28,11 @@ https://spring-boot-issuetracker.herokuapp.com/api/issues
     }
 
 update
+
 https://spring-boot-issuetracker.herokuapp.com/api/issues
+    
     {
-        "id":{id}
+        "id":{id},
         "title": "",
         "description": "",
         "assigneeName": "",
