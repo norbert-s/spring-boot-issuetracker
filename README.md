@@ -1,6 +1,6 @@
 # spring-boot-issuetracker
 
-this app is hosted on heroku (please be patient the fist time you start the app because it will take about 15-20 seconds to load for it is in sleeping mode - it is obviously not a production app)
+!!This app is hosted on heroku (Since heroku's plan has changed the pods can be only manually be switched on and off, therefore they are only running  when I am taking interviews )
 
 https://spring-boot-issue-tracker.herokuapp.com/
 
