@@ -1,6 +1,13 @@
 # spring-boot-issuetracker
 
-!!This app is hosted on heroku (Since heroku's plan has changed the pods can be only manually be switched on and off, therefore they are only running  when I am taking interviews )
+Since heroku's subscription plan has changed and the pods can onlybe manually switched on and off, they are not running 24/7.
+
+As a workaround the app can be run by running "docker compose up" from the command line. Obviously docker needs to be installed first.
+
+Once its started - it will download the image of the app from dockerhub,etc - it can be accessed from "http://localhost:8080"
+
+After running it,  clean up with " docker compose down --rmi all"
+
 
 https://spring-boot-issue-tracker.herokuapp.com/
 
