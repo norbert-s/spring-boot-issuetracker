@@ -1,7 +1,7 @@
 version: '1'
 services:
   mysqldb:
-    image: mysql:5.7
+    image: mysql:latest
     environment:
       MYSQL_DATABASE: book_store
       MYSQL_ROOT_PASSWORD: root
@@ -10,15 +10,22 @@ services:
     restart: always
     networks:
       - issuetracker
-    ports:
-      - 3309:3306
+    volumes:
+      - /var/lib/mysql
+    ports: 
+      - "3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 20
 
   app:
-    build: .
+    image: norbertsu/backendapp:latest
     ports:
       - 8080:8080
     depends_on:
-      - mysqldb
+      mysqldb:
+        condition: service_healthy
     networks:
       - issuetracker
 
@@ -28,3 +35,4 @@ networks:
       bridge
   issuetracker:
     name: issuetracker
+
