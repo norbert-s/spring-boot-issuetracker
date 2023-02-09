@@ -1,0 +1,30 @@
+version: '1'
+services:
+  mysqldb:
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: book_store
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: student
+      MYSQL_PASSWORD: student
+    restart: always
+    networks:
+      - issuetracker
+    ports:
+      - 3309:3306
+
+  app:
+    build: .
+    ports:
+      - 8080:8080
+    depends_on:
+      - mysqldb
+    networks:
+      - issuetracker
+
+networks:
+  default:
+    driver : 
+      bridge
+  issuetracker:
+    name: issuetracker
