@@ -1,7 +1,7 @@
 version: '1'
 services:
   mysqldb:
-    image: mysql:latest
+    image: mysql:5.7
     environment:
       MYSQL_DATABASE: book_store
       MYSQL_ROOT_PASSWORD: root
@@ -18,9 +18,12 @@ services:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
       timeout: 5s
       retries: 20
+    volumes:
+      - datavolume:/var/lib/mysql
+
 
   app:
-    image: norbertsu/backendapp:latest
+    image: norbertsu/springboot-issuetracker:latest
     ports:
       - 8080:8080
     depends_on:
@@ -36,3 +39,5 @@ networks:
   issuetracker:
     name: issuetracker
 
+volumes:
+  datavolume:
