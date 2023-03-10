@@ -1,5 +1,7 @@
 package com.issuetracker.dataJpa.entity;
 
+import org.springframework.stereotype.Component;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -37,9 +39,18 @@ public class Issue {
         this.status = status;
     }
 
+    public Issue( int id, String title, String description, String assignee_name, String status) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.assigneeName = assignee_name;
+        this.status = status;
+    }
+
     public Issue() {
 
     }
+
 
 
 
