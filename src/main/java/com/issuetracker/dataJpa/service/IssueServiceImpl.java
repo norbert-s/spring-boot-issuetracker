@@ -1,6 +1,6 @@
 package com.issuetracker.dataJpa.service;
 
-import com.issuetracker.dataJpa.dao.IssueRepository;
+import com.issuetracker.dataJpa.dao.IssueDao;
 import com.issuetracker.dataJpa.entity.Issue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,20 +11,20 @@ import java.util.Optional;
 @Service
 public class IssueServiceImpl implements IssueService {
 
-    private IssueRepository issueRepository;
+    private IssueDao issueDao;
     @Autowired
-    public IssueServiceImpl(IssueRepository issueRepository) {
-        this.issueRepository = issueRepository;
+    public IssueServiceImpl(IssueDao issueDao) {
+        this.issueDao = issueDao;
     }
 
     @Override
     public List<Issue> findAll() {
-        return issueRepository.findAll();
+        return issueDao.findAll();
     }
 
     @Override
     public Issue findById(int theId) {
-        Optional<Issue> result = issueRepository.findById(theId);
+        Optional<Issue> result = issueDao.findById(theId);
         Issue theIssue = null;
 
         if(result.isPresent()){
@@ -37,12 +37,12 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public void save(Issue theIssue) {
-        issueRepository.save(theIssue);
+    public Issue save(Issue theIssue) {
+        return issueDao.save(theIssue);
     }
 
     @Override
-    public void deleteById(int theId) {
-        issueRepository.deleteById(theId);
+    public Issue deleteById(int theId) {
+        return issueDao.deleteById(theId);
     }
 }

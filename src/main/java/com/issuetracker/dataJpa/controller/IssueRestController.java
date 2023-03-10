@@ -53,11 +53,8 @@ public class IssueRestController {
         issueService.save(theIssue);
         return theIssue;
     }
-
-    // add mapping for DELETE /issues/{issueId} - delete issue
-
     @DeleteMapping("/issues/{issueId}")
-    public String deleteIssue(@PathVariable int issueId) {
+    public Issue deleteIssue(@PathVariable int issueId) {
 
         Issue tempIssue = issueService.findById(issueId);
 
@@ -69,6 +66,21 @@ public class IssueRestController {
 
         issueService.deleteById(issueId);
 
-        return "Deleted issue id - " + issueId;
+        return tempIssue;
     }
+//    @DeleteMapping("/issues/{issueAssigneeName}")
+//    public Issue deleteIssueByName(@PathVariable String name) {
+//
+//        Issue tempIssue = issueService.findByName(name);
+//
+//        // throw exception if null
+//
+//        if (tempIssue == null) {
+//            throw new RuntimeException("issue id not found - " + name);
+//        }
+//
+//        issueService.deleteByName(name);
+//
+//        return tempIssue;
+//    }
 }

@@ -9,7 +9,7 @@ public interface IssueService {
 
     public Issue findById(int theId);
 
-    public void save(Issue theIssue);
+    public Issue save(Issue theIssue);
 
-    public void deleteById(int theId);
+    public Issue deleteById(int theId);
 }
