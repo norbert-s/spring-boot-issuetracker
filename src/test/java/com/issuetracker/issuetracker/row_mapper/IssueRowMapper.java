@@ -6,8 +6,8 @@ import org.springframework.jdbc.core.RowMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class IssueRowMapper {
-    public static class EmployeeRowMapper implements RowMapper<Issue> {
+public class IssueRowMapper implements RowMapper<Issue>{
+
         @Override
         public Issue mapRow(ResultSet rs, int rowNum) throws SQLException {
             return new Issue(
@@ -18,5 +18,5 @@ public class IssueRowMapper {
                     rs.getString("assignee_name")
             );
         }
-    }
+
 }
