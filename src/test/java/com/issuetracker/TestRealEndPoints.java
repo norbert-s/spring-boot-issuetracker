@@ -2,8 +2,7 @@ package com.issuetracker;
 
 import com.issuetracker.config.MyTestConfig;
 import com.issuetracker.dataJpa.entity.Issue;
-import com.issuetracker.database_integration.UtilityMethods;
-import org.apache.logging.log4j.Level;
+import com.issuetracker.database_integration.DatabaseQueries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
@@ -31,12 +30,12 @@ public class TestRealEndPoints {
     private TestRestTemplate restTemplate;
 
     @Autowired
-    UtilityMethods utilityMethods;
-
+    DatabaseQueries dbQueries;
     @BeforeAll
     public static void setup(){
 
     }
+
 
     @Test
     public void returningAllIssuesEndpoint() {
@@ -75,7 +74,7 @@ public class TestRealEndPoints {
 
     @Test
     public void deletingIssueByIdEndpoint() {
-        Issue issue = utilityMethods.createIssue();
+        Issue issue = dbQueries.saveIssue();
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "application/json");
         //HttpEntity<Issue> requestEntity = new HttpEntity<>(issue, headers);

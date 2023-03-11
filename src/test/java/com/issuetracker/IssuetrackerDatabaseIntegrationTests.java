@@ -3,26 +3,24 @@ package com.issuetracker;
 import com.issuetracker.dataJpa.dao.IssueDao;
 import com.issuetracker.dataJpa.entity.Issue;
 import com.issuetracker.dataJpa.service.IssueService;
-import com.issuetracker.database_integration.UtilityMethods;
+import com.issuetracker.database_integration.DatabaseQueries;
 import com.issuetracker.issue_object_generator.IssuePOJO;
 import com.issuetracker.listeners.Listener;
-import com.issuetracker.row_mapper.IssueRowMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 
-import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+
 
 @TestPropertySource("/application-test.properties")
 @ExtendWith(Listener.class)
@@ -40,73 +38,53 @@ public class IssuetrackerDatabaseIntegrationTests {
     @Autowired
     private IssueService issueService;
 
-
-    @Value("${sql.script.create.issue}")
-    private String sqlCreateIssue;
-
-    @Value("${sql.script.delete.issue}")
-    private String sqlDeleteIssue;
-
     @Autowired
-    UtilityMethods utilityMethods;
+    private DatabaseQueries dbQueries;
+
+    private Issue testIssue;
 
     @BeforeEach
-    public void setupDatabase() {
-
+    public void setup() {
+        testIssue = IssuePOJO.issueGenerator();
 
     }
 
-    @Tag("db_integration_tests")
     @Test
-    public void testingCreatingIssue() {
-        Issue generatedIssue = IssuePOJO.issueGenerator();
-        Issue returnedIssue = issueService.save(generatedIssue);
-        assertEquals(returnedIssue.getAssigneeName(), generatedIssue.getAssigneeName(), "assigneeNames are different");
-        assertEquals(returnedIssue.getDescription(), generatedIssue.getDescription(), "descriptions are different");
-        assertEquals(returnedIssue.getTitle(), generatedIssue.getTitle(), "titles are different");
-        assertEquals(returnedIssue.getStatus(), generatedIssue.getStatus(), "statuses are different");
-        int idToDelete = returnedIssue.getId();
-        jdbc.execute(" delete from issue where id=" + idToDelete);
+    public void testSaveIssue() {
+        //testing saving issue service
+        Optional<Issue> createdDbEntry = Optional.ofNullable(issueService.save(testIssue));
+        assertThat(createdDbEntry.get().equalsWithoutCheckingId(testIssue));
+
+
+        //deleting issue by sql
+        int deletedId = createdDbEntry.get().getId();
+        dbQueries.deleteFromDbAndCheckIfPasses(deletedId);
     }
 
-    @Tag("db_integration_tests")
     @Test
-    public void testingDeletingIssue() {
-        Issue generatedIssue = IssuePOJO.issueGenerator();
-        Issue returnedIssue = issueService.save(generatedIssue);
-        LOGGER.info(returnedIssue.getId());
-        assertEquals(returnedIssue.getAssigneeName(), generatedIssue.getAssigneeName(), "assigneeNames are different");
-        assertEquals(returnedIssue.getDescription(), generatedIssue.getDescription(), "descriptions are different");
-        assertEquals(returnedIssue.getTitle(), generatedIssue.getTitle(), "titles are different");
-        assertEquals(returnedIssue.getStatus(), generatedIssue.getStatus(), "statuses are different");
+    public void testFindIssueById() {
+        //saving by sql
+        Optional<Issue> createdDbEntry = Optional.ofNullable(dbQueries.saveIssue());
 
-        int idToDelete = returnedIssue.getId();
-        issueService.deleteById(idToDelete);
-        List<Issue> returnedIssueAfterDeletion = jdbc.query("SELECT * from issue where id=" + idToDelete, new IssueRowMapper());
+        //testing the service here
+        Optional<Issue> foundIssue = Optional.ofNullable(issueService.findById(createdDbEntry.get().getId()));
+        assertThat(testIssue.equalsWithoutCheckingId(foundIssue.get()));
 
-        assertEquals(0, returnedIssueAfterDeletion.size());
+        //deleting issue by sql
+        int deletedId = createdDbEntry.get().getId();
+        dbQueries.deleteFromDbAndCheckIfPasses(deletedId);
     }
 
-    @Tag("db_integration_tests")
     @Test
-    public void testingFindingIssueById() {
-        Issue generatedIssue = IssuePOJO.issueGenerator();
-        Issue returnedIssue = issueService.save(generatedIssue);
-        returnedIssue = issueService.findById(returnedIssue.getId());
-        assertEquals(returnedIssue.getAssigneeName(), generatedIssue.getAssigneeName(), "assigneeNames are different");
-        assertEquals(returnedIssue.getDescription(), generatedIssue.getDescription(), "descriptions are different");
-        assertEquals(returnedIssue.getTitle(), generatedIssue.getTitle(), "titles are different");
-        assertEquals(returnedIssue.getStatus(), generatedIssue.getStatus(), "statuses are different");
-        LOGGER.info(returnedIssue.getId());
+    public void testDeleteIssue() {
+        //saving by sql
+        Optional<Issue> createdDbEntry = Optional.ofNullable(dbQueries.saveIssue());
 
-        issueService.deleteById(returnedIssue.getId());
-        List<Issue> returnedIssueAfterDeletion = jdbc.query("SELECT * from issue where id=" + returnedIssue.getId(), new IssueRowMapper());
-        assertEquals(0, returnedIssueAfterDeletion.size());
-    }
+        //testing the service here
+        issueService.deleteById(createdDbEntry.get().getId());
 
-    @AfterEach
-    public void setupAfterTransaction() {
-        //jdbc.execute(sqlDeleteIssue);
-
+        //deletion was successfull by sql
+        int deletedId = createdDbEntry.get().getId();
+        dbQueries.selectAllFromDbByIdAndAssertIfItIsEmpty(deletedId);
     }
 }

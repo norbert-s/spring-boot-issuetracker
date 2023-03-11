@@ -11,5 +11,5 @@ public interface IssueService {
 
     public Issue save(Issue theIssue);
 
-    public Issue deleteById(int theId);
+    public void deleteById(int theId);
 }

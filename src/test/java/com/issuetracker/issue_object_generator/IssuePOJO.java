@@ -7,7 +7,7 @@ public class IssuePOJO {
     static Faker faker = new Faker();
 
     public static Issue issueGenerator() {
-        int id = faker.number().numberBetween(1000, 2000);
+        int id = 0;
         String description = faker.lorem().sentences(5).get(0);
         String title = faker.lorem().sentence();
         String assigneeName = faker.name().fullName();
