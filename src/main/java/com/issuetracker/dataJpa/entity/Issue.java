@@ -113,8 +113,17 @@ public class Issue {
         return getId() == issue.getId() && Objects.equals(getTitle(), issue.getTitle()) && Objects.equals(getDescription(), issue.getDescription()) && Objects.equals(getAssigneeName(), issue.getAssigneeName()) && Objects.equals(getStatus(), issue.getStatus());
     }
 
+    public boolean equalsWithoutCheckingId(Object o){
+        if (this == o) return true;
+        if (!(o instanceof Issue)) return false;
+        Issue issue = (Issue) o;
+        return Objects.equals(getTitle(), issue.getTitle()) && Objects.equals(getDescription(), issue.getDescription()) && Objects.equals(getAssigneeName(), issue.getAssigneeName()) && Objects.equals(getStatus(), issue.getStatus());
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(getId(), getTitle(), getDescription(), getAssigneeName(), getStatus());
     }
+
+
 }
