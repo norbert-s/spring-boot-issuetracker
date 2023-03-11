@@ -12,34 +12,34 @@ import java.util.Objects;
 
 
 @Entity
-@Table(name="issue")
+@Table(name = "issue")
 public class Issue {
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
-    @Column(name="id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int id;
 
-    @Column(name="title")
+    @Column(name = "title")
     String title;
 
-    @Column(name="description")
+    @Column(name = "description")
     String description;
 
-    @Column(name="assignee_name")
+    @Column(name = "assignee_name")
     String assigneeName;
 
-    @Column(name="status")
+    @Column(name = "status")
     String status;
 
 
-    public Issue( String title, String description, String assignee_name, String status) {
+    public Issue(String title, String description, String assignee_name, String status) {
         this.title = title;
         this.description = description;
         this.assigneeName = assignee_name;
         this.status = status;
     }
 
-    public Issue( int id, String title, String description, String assignee_name, String status) {
+    public Issue(int id, String title, String description, String assignee_name, String status) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -50,8 +50,6 @@ public class Issue {
     public Issue() {
 
     }
-
-
 
 
     public int getId() {
@@ -113,7 +111,7 @@ public class Issue {
         return getId() == issue.getId() && Objects.equals(getTitle(), issue.getTitle()) && Objects.equals(getDescription(), issue.getDescription()) && Objects.equals(getAssigneeName(), issue.getAssigneeName()) && Objects.equals(getStatus(), issue.getStatus());
     }
 
-    public boolean equalsWithoutCheckingId(Object o){
+    public boolean equalsWithoutCheckingId(Object o) {
         if (this == o) return true;
         if (!(o instanceof Issue)) return false;
         Issue issue = (Issue) o;
