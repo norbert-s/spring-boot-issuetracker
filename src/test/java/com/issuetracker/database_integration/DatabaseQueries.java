@@ -35,7 +35,7 @@ public class DatabaseQueries {
         return jdbc.query("SELECT * from issue where id=" + id, new IssueRowMapper());
     }
 
-    public void selectAllFromDbByIdAndAssertIfItIsEmpty(int id) {
+    public void selectAllFromDbByIdAndAssertThatItIsEmpty(int id) {
         Optional<List<Issue>> result = Optional.of(jdbc.query("SELECT * from issue where id=" + id, new IssueRowMapper()));
         assertTrue(result.get().size() == 0);
     }

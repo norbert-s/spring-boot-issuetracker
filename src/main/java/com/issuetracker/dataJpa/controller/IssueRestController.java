@@ -56,31 +56,12 @@ public class IssueRestController {
     @DeleteMapping("/issues/{issueId}")
     public Issue deleteIssue(@PathVariable int issueId) {
 
-        Issue tempIssue = issueService.findById(issueId);
-
-        // throw exception if null
-
-        if (tempIssue == null) {
+        Optional<Issue> tempIssue = Optional.ofNullable(issueService.findById(issueId));
+        if (tempIssue.isPresent()) {
+            issueService.deleteById(issueId);
+            return tempIssue.get();
+        }else{
             throw new RuntimeException("issue id not found - " + issueId);
         }
-
-        issueService.deleteById(issueId);
-
-        return tempIssue;
     }
-//    @DeleteMapping("/issues/{issueAssigneeName}")
-//    public Issue deleteIssueByName(@PathVariable String name) {
-//
-//        Issue tempIssue = issueService.findByName(name);
-//
-//        // throw exception if null
-//
-//        if (tempIssue == null) {
-//            throw new RuntimeException("issue id not found - " + name);
-//        }
-//
-//        issueService.deleteByName(name);
-//
-//        return tempIssue;
-//    }
 }

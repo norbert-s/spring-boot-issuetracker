@@ -8,9 +8,7 @@ import com.issuetracker.issue_object_generator.IssuePOJO;
 import com.issuetracker.listeners.Listener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -46,7 +44,6 @@ public class IssuetrackerDatabaseIntegrationTests {
     @BeforeEach
     public void setup() {
         testIssue = IssuePOJO.issueGenerator();
-
     }
 
     @Test
@@ -79,12 +76,16 @@ public class IssuetrackerDatabaseIntegrationTests {
     public void testDeleteIssue() {
         //saving by sql
         Optional<Issue> createdDbEntry = Optional.ofNullable(dbQueries.saveIssue());
-
+        LOGGER.info(createdDbEntry.isPresent()?createdDbEntry.get():" warning not found");
         //testing the service here
         issueService.deleteById(createdDbEntry.get().getId());
 
-        //deletion was successfull by sql
+        //assert deletion was successfull by sql
         int deletedId = createdDbEntry.get().getId();
-        dbQueries.selectAllFromDbByIdAndAssertIfItIsEmpty(deletedId);
+        dbQueries.selectAllFromDbByIdAndAssertThatItIsEmpty(deletedId);
+    }
+    @AfterEach
+    public void tearDown(){
+        testIssue = null;
     }
 }

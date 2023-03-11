@@ -11,10 +11,10 @@ public class IssueRowMapper implements RowMapper<Issue> {
     public Issue mapRow(ResultSet rs, int rowNum) throws SQLException {
         return new Issue(
                 rs.getInt("id"),
-                rs.getString("description"),
                 rs.getString("title"),
-                rs.getString("status"),
-                rs.getString("assignee_name")
+                rs.getString("description"),
+                rs.getString("assignee_name"),
+                rs.getString("status")
         );
     }
 }
