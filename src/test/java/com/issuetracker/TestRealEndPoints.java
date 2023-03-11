@@ -19,6 +19,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -42,20 +43,26 @@ public class TestRealEndPoints {
 
 
     @Test
-    public void returningAllIssuesEndpoint() {
-        ResponseEntity<List<Issue>> responseEntity = restTemplate.exchange(
-                "http://localhost:8080/api/issues",
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<List<Issue>>() {}
-        );
-        List<Issue> issues = responseEntity.getBody();
-        assertNotNull(issues);
+    public void returningIssueByIdEndpoint() {
+        Optional<Issue> createdIssue = Optional.ofNullable(dbQueries.saveIssue());
+        if(createdIssue.isPresent()){
+            ResponseEntity<Issue> responseEntity = restTemplate.exchange(
+                    "http://localhost:8080/api/issues/{id}",
+                    HttpMethod.GET,
+                    null,
+                    Issue.class,
+                    createdIssue.get().getId()
+            );
+            Optional<Issue> foundIssue = Optional.ofNullable(responseEntity.getBody());
+            assertTrue(foundIssue.get().equalsWithoutCheckingId(createdIssue.get()));
+        }else{
+            throw new RuntimeException("issue is not present");
+        }
+
+
     }
     @Test
     public void creatingIssueEndpoint() {
-
-
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "application/json");
 
@@ -70,7 +77,7 @@ public class TestRealEndPoints {
         Issue returnedIssue = responseEntity.getBody();
         assertTrue(returnedIssue.equalsWithoutCheckingId(testIssue));
 
-        //delete from db abd check if passes
+        //delete from db and check if passes
         dbQueries.deleteFromDbAndCheckIfPasses(returnedIssue.getId());
 
     }
