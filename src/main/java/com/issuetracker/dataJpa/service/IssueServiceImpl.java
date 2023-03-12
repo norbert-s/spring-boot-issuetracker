@@ -2,6 +2,9 @@ package com.issuetracker.dataJpa.service;
 
 import com.issuetracker.dataJpa.dao.IssueDao;
 import com.issuetracker.dataJpa.entity.Issue;
+import com.issuetracker.dataJpa.exceptionhandling.exceptions.IssueDeleteException;
+import com.issuetracker.dataJpa.exceptionhandling.exceptions.IssueNotFoundException;
+import com.issuetracker.dataJpa.exceptionhandling.exceptions.IssueSaveException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +36,7 @@ public class IssueServiceImpl implements IssueService {
             return result.get();
         }
         else{
-            throw new RuntimeException("Did not find issue with given id "+theId);
+            throw new IssueNotFoundException( "Did not find issue with given id "+theId);
         }
     }
 
@@ -44,7 +47,7 @@ public class IssueServiceImpl implements IssueService {
         if(createdIssue.isPresent()){
             return createdIssue.get();
         }else{
-            throw new RuntimeException("issue could not be created in database " +  theIssue);
+            throw new IssueSaveException("issue could not be saved in the database " +  theIssue);
         }
     }
 
@@ -53,13 +56,11 @@ public class IssueServiceImpl implements IssueService {
         Optional<Issue> found = Optional.ofNullable(findById(theId));
         if(found.isPresent()){
             try{
-                LOGGER.info("issue is being deleted "+found.get());
                 issueDao.deleteById(theId);
+                LOGGER.info("issue has been deleted "+found.get());
             }catch (Exception e){
-                LOGGER.info("Issue with given id was found but could not delete it "+found.get());
+                throw new IssueDeleteException("Issue with given id was found but could not delete it "+found.get());
             }
-        }else{
-            LOGGER.info("Could not delete issue with given id "+theId);
         }
     }
 

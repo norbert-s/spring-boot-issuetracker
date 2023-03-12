@@ -2,10 +2,12 @@ package com.issuetracker;
 
 import com.issuetracker.config.MyTestConfig;
 import com.issuetracker.dataJpa.entity.Issue;
+import com.issuetracker.dataJpa.exceptionhandling.ErrorResponse;
 import com.issuetracker.database_integration.DatabaseQueries;
 import com.issuetracker.issue_object_generator.IssuePOJO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -17,6 +19,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.context.TestPropertySource;
+
 
 import java.util.Optional;
 
@@ -53,7 +56,7 @@ public class RealEndPointTest {
         Optional<Issue> createdIssue = Optional.ofNullable(dbQueries.saveIssue());
         if (createdIssue.isPresent()) {
             ResponseEntity<Issue> responseEntity = restTemplate.exchange(
-                    protocol+ hostName +":"+serverPort+"/api/issues/{id}",
+                    protocol + hostName + ":" + serverPort + "/api/issues/{id}",
                     HttpMethod.GET,
                     null,
                     Issue.class,
@@ -78,7 +81,7 @@ public class RealEndPointTest {
         HttpEntity<Issue> requestEntity = new HttpEntity<>(testIssue, headers);
 
         ResponseEntity<Issue> responseEntity = restTemplate.exchange(
-                protocol+ hostName +":"+serverPort+"/api/issues",
+                protocol + hostName + ":" + serverPort + "/api/issues",
                 HttpMethod.POST,
                 requestEntity,
                 new ParameterizedTypeReference<Issue>() {
@@ -100,7 +103,7 @@ public class RealEndPointTest {
         LOGGER.info("id -> " + id);
 
         ResponseEntity<Void> responseEntity = restTemplate.exchange(
-                protocol+ hostName +":"+serverPort+"/api/issues/{id}",
+                protocol + hostName + ":" + serverPort + "/api/issues/{id}",
                 HttpMethod.DELETE,
                 null,
                 Void.class,
@@ -112,5 +115,45 @@ public class RealEndPointTest {
 
         //assert issue was not found after deletion
         dbQueries.selectAllFromDbByIdAndAssertThatItIsEmpty(id);
+    }
+
+    @Test
+    public void notFound() {
+        ResponseEntity<Issue> response = restTemplate.exchange(
+                "http://localhost:8080/api/issues1",
+                HttpMethod.GET,
+                null,
+                Issue.class);
+        LOGGER.info("status code should be 404 and it is ->" + response.getStatusCodeValue());
+        assertTrue(response.getStatusCode().is4xxClientError());
+        assertTrue(response.getStatusCodeValue() == 404);
+    }
+
+    @Test
+    @Tag("current")
+    public void idShouldNotBeFound() {
+        int idToFind = 0;
+        ResponseEntity<ErrorResponse> response = restTemplate.exchange(
+                protocol + hostName + ":" + serverPort + "/api/issues/{id}",
+                HttpMethod.GET,
+                null,
+                ErrorResponse.class,
+                idToFind
+        );
+        LOGGER.info("status code should be 404 and it is ->" + response.getStatusCodeValue());
+        LOGGER.info(response.getBody());
+        assertTrue(response.getStatusCode().is4xxClientError());
+        assertTrue(response.getStatusCodeValue() == 404);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+
+        ErrorResponse errorResponse = response.getBody();
+        assertEquals(HttpStatus.NOT_FOUND.value(), errorResponse.getStatus());
+        assertEquals("Did not find issue with given id " + idToFind, errorResponse.getMessage());
+        assertNotNull(errorResponse.getTimestamp());
+    }
+
+    @AfterEach
+    public void teardown() {
+        testIssue = null;
     }
 }
