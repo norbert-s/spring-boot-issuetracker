@@ -20,13 +20,14 @@ import java.util.Optional;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 
-@TestPropertySource("/application-test.properties")
+@TestPropertySource("/dev.properties")
 @ExtendWith(Listener.class)
 @SpringBootTest
 @Tag("db_integration_tests")
-public class IssuetrackerDatabaseIntegrationTests {
+@Tag("sanity")
+public class DatabaseIntegrationTest {
 
-    protected static final Logger LOGGER = LogManager.getLogger(IssuetrackerDatabaseIntegrationTests.class);
+    protected static final Logger LOGGER = LogManager.getLogger(DatabaseIntegrationTest.class);
     @Autowired
     private JdbcTemplate jdbc;
 
@@ -55,7 +56,7 @@ public class IssuetrackerDatabaseIntegrationTests {
 
         //deleting issue by sql
         int deletedId = createdDbEntry.get().getId();
-        dbQueries.deleteFromDbAndCheckIfPasses(deletedId);
+        dbQueries.deleteFromDbAndAssertDeletionSuccessful(deletedId);
     }
 
     @Test
@@ -69,14 +70,28 @@ public class IssuetrackerDatabaseIntegrationTests {
 
         //deleting issue by sql
         int deletedId = createdDbEntry.get().getId();
-        dbQueries.deleteFromDbAndCheckIfPasses(deletedId);
+        dbQueries.deleteFromDbAndAssertDeletionSuccessful(deletedId);
+    }
+
+    @Test
+    public void testFindIssueByIdByDao() {
+        //saving by sql
+        Optional<Issue> createdDbEntry = Optional.ofNullable(dbQueries.saveIssue());
+
+        //testing the service here
+        Optional<Issue> foundIssue = Optional.ofNullable(issueDao.findById(createdDbEntry.get().getId()));
+        assertThat(testIssue.equalsWithoutCheckingId(foundIssue.get()));
+
+        //deleting issue by sql
+        int deletedId = createdDbEntry.get().getId();
+        dbQueries.deleteFromDbAndAssertDeletionSuccessful(deletedId);
     }
 
     @Test
     public void testDeleteIssue() {
         //saving by sql
         Optional<Issue> createdDbEntry = Optional.ofNullable(dbQueries.saveIssue());
-        LOGGER.info(createdDbEntry.isPresent()?createdDbEntry.get():" warning not found");
+        LOGGER.info(createdDbEntry.isPresent()?createdDbEntry.get():" warning - not found");
         //testing the service here
         issueService.deleteById(createdDbEntry.get().getId());
 

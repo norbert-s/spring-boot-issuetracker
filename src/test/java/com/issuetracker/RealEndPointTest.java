@@ -7,27 +7,27 @@ import com.issuetracker.issue_object_generator.IssuePOJO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.test.context.TestPropertySource;
 
-import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, properties = {"server.port=8080"})
 @Import(MyTestConfig.class)
-public class TestRealEndPoints {
-    protected static final Logger LOGGER = LogManager.getLogger(TestRealEndPoints.class);
+@TestPropertySource("/dev.properties")
+@Tag("sanity")
+public class RealEndPointTest {
+    protected static final Logger LOGGER = LogManager.getLogger(RealEndPointTest.class);
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -37,30 +37,39 @@ public class TestRealEndPoints {
     private Issue testIssue;
 
     @BeforeEach
-    public  void setup() {
+    public void setup() {
         testIssue = IssuePOJO.issueGenerator();
     }
 
+    @Value("${api.protocol}")
+    String protocol;
+    @Value("${api.hostname}")
+    String hostName;
+    @Value("${server.port}")
+    String serverPort;
 
     @Test
     public void returningIssueByIdEndpoint() {
         Optional<Issue> createdIssue = Optional.ofNullable(dbQueries.saveIssue());
-        if(createdIssue.isPresent()){
+        if (createdIssue.isPresent()) {
             ResponseEntity<Issue> responseEntity = restTemplate.exchange(
-                    "http://localhost:8080/api/issues/{id}",
+                    protocol+ hostName +":"+serverPort+"/api/issues/{id}",
                     HttpMethod.GET,
                     null,
                     Issue.class,
                     createdIssue.get().getId()
             );
+
             Optional<Issue> foundIssue = Optional.ofNullable(responseEntity.getBody());
+            assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
             assertTrue(foundIssue.get().equalsWithoutCheckingId(createdIssue.get()));
-        }else{
+            dbQueries.deleteFromDbAndAssertDeletionSuccessful(createdIssue.get().getId());
+        } else {
             throw new RuntimeException("issue is not present");
         }
 
-
     }
+
     @Test
     public void creatingIssueEndpoint() {
         HttpHeaders headers = new HttpHeaders();
@@ -69,39 +78,37 @@ public class TestRealEndPoints {
         HttpEntity<Issue> requestEntity = new HttpEntity<>(testIssue, headers);
 
         ResponseEntity<Issue> responseEntity = restTemplate.exchange(
-                "http://localhost:8080/api/issues",
+                protocol+ hostName +":"+serverPort+"/api/issues",
                 HttpMethod.POST,
                 requestEntity,
-                new ParameterizedTypeReference<Issue>() {}
+                new ParameterizedTypeReference<Issue>() {
+                }
         );
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         Issue returnedIssue = responseEntity.getBody();
         assertTrue(returnedIssue.equalsWithoutCheckingId(testIssue));
 
         //delete from db and check if passes
-        dbQueries.deleteFromDbAndCheckIfPasses(returnedIssue.getId());
-
+        dbQueries.deleteFromDbAndAssertDeletionSuccessful(returnedIssue.getId());
     }
 
     @Test
     public void deletingIssueByIdEndpoint() {
         Issue issue = dbQueries.saveIssue();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Type", "application/json");
-        //HttpEntity<Issue> requestEntity = new HttpEntity<>(issue, headers);
         int id = issue.getId();
-        LOGGER.info("id -> "+id);
-        ResponseEntity<Issue> responseEntity = restTemplate.exchange(
-                "http://localhost:8080/api/issues/{id}",
+        LOGGER.info("id -> " + id);
+
+        ResponseEntity<Void> responseEntity = restTemplate.exchange(
+                protocol+ hostName +":"+serverPort+"/api/issues/{id}",
                 HttpMethod.DELETE,
                 null,
-                Issue.class,
+                Void.class,
                 id
         );
-        //assert correct issue has been deleted
 
-        LOGGER.info(responseEntity.getBody());
-        LOGGER.info(issue);
-        assertTrue(responseEntity.getBody().equalsWithoutCheckingId(issue));
+        //assert correct issue has been deleted
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
         //assert issue was not found after deletion
         dbQueries.selectAllFromDbByIdAndAssertThatItIsEmpty(id);

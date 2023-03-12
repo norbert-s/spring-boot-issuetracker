@@ -26,7 +26,8 @@ public class IssueServiceImpl implements IssueService {
 
     @Override
     public Issue findById(int theId) {
-        Optional<Issue> result = issueDao.findById(theId);
+        Optional<Issue> result = Optional.ofNullable(issueDao.findById(theId));
+        LOGGER.info("result "+result);
         if(result.isPresent()){
             LOGGER.info("issue has been found with given id "+theId +" -> "+result.get());
             return result.get();
@@ -38,7 +39,13 @@ public class IssueServiceImpl implements IssueService {
 
     @Override
     public Issue save(Issue theIssue) {
-        return issueDao.save(theIssue);
+        theIssue.setId(0);
+        Optional<Issue> createdIssue = Optional.ofNullable(issueDao.save(theIssue));
+        if(createdIssue.isPresent()){
+            return createdIssue.get();
+        }else{
+            throw new RuntimeException("issue could not be created in database " +  theIssue);
+        }
     }
 
     @Override
@@ -48,15 +55,22 @@ public class IssueServiceImpl implements IssueService {
             try{
                 LOGGER.info("issue is being deleted "+found.get());
                 issueDao.deleteById(theId);
-
             }catch (Exception e){
                 LOGGER.info("Issue with given id was found but could not delete it "+found.get());
-
             }
-
         }else{
-            LOGGER.info("Did not find issue with given id "+theId);
+            LOGGER.info("Could not delete issue with given id "+theId);
         }
-
     }
+
+//    @Override
+//    public Issue updateById(int id, Issue newIssue) {
+//        Optional<Issue> foundIssue = Optional.ofNullable(findById(id));
+//        if(foundIssue.isPresent()){
+//            newIssue.setId(foundIssue.get().getId());
+//            return issueDao.updateById(id,newIssue);
+//        }else{
+//            throw new RuntimeException("issue was not in the database");
+//        }
+//    }
 }
