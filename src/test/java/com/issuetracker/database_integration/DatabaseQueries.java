@@ -8,12 +8,10 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Component
 public class DatabaseQueries {
@@ -21,23 +19,19 @@ public class DatabaseQueries {
     @Autowired
     private JdbcTemplate jdbc;
 
-    public void deleteFromDatabaseById(int idToDelete) {
-        jdbc.execute(" delete from issue where id=" + idToDelete);
+    public void deleteFromDbAndAssertDeletionSuccessful(int deletedId) {
+        jdbc.execute(" delete from issue where id=" + deletedId);
+        selectAllFromDbByIdAndAssertThatItIsEmpty(deletedId);
     }
 
-    public void deleteFromDbAndCheckIfPasses(int deletedId) {
-        deleteFromDatabaseById(deletedId);
-        List<Issue> returnedIssueAfterDeletion = selectAllFromDbById(deletedId);
-        assertEquals(0, returnedIssueAfterDeletion.size(), "an issue has been found by above id " + deletedId + " , when it was supposed to have been already deleted");
-    }
-
-    public List<Issue> selectAllFromDbById(int id) {
-        return jdbc.query("SELECT * from issue where id=" + id, new IssueRowMapper());
-    }
-
-    public void selectAllFromDbByIdAndAssertThatItIsEmpty(int id) {
-        Optional<List<Issue>> result = Optional.of(jdbc.query("SELECT * from issue where id=" + id, new IssueRowMapper()));
-        assertTrue(result.get().size() == 0);
+    public void selectAllFromDbByIdAndAssertThatItIsEmpty(int deletedId) {
+        Optional<List<Issue>> returnedIssueAfterDeletion = Optional.ofNullable(jdbc.query("SELECT * from issue where id=" + deletedId, new IssueRowMapper()));
+        if(returnedIssueAfterDeletion.isPresent()){
+            assertEquals(0, returnedIssueAfterDeletion.get().size(), "an issue has been found by above id " + deletedId + " , when it was supposed to have been already deleted");
+            LOGGER.info("issue has been successfully deleted -> id "+deletedId);
+        }else{
+            throw new RuntimeException("issue was not deleted from the db"+deletedId);
+        }
     }
 
     public Issue saveIssue() {

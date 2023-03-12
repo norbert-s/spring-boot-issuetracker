@@ -4,6 +4,8 @@ import com.issuetracker.dataJpa.entity.Issue;
 import com.issuetracker.dataJpa.service.IssueService;
 
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +22,8 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api")
 public class IssueRestController {
+
+    protected static final Logger LOGGER = LogManager.getLogger(IssueRestController.class);
     private IssueService issueService;
 
     @Autowired
@@ -34,34 +38,19 @@ public class IssueRestController {
 
     @GetMapping("/issues/{issueId}")
     public Issue getIssue(@PathVariable int issueId) {
-        Issue theIssue = issueService.findById(issueId);
-
-        if (theIssue == null) {
-            throw new RuntimeException("issue id not found - " +  issueId);
-        }
-        return theIssue;
+        return issueService.findById(issueId);
     }
 
     @PostMapping("/issues")
     public Issue addIssue(@RequestBody Issue theIssue) {
-        theIssue.setId(0);
-        issueService.save(theIssue);
-        return theIssue;
+        return issueService.save(theIssue);
     }
-    @PutMapping("/issues")
-    public Issue updateIssue(@RequestBody Issue theIssue) {
-        issueService.save(theIssue);
-        return theIssue;
+    @PutMapping("/issues/{issueId}")
+    public Issue updateIssueById(@RequestBody Issue theIssue) {
+        return issueService.save(theIssue);
     }
     @DeleteMapping("/issues/{issueId}")
-    public Issue deleteIssue(@PathVariable int issueId) {
-
-        Optional<Issue> tempIssue = Optional.ofNullable(issueService.findById(issueId));
-        if (tempIssue.isPresent()) {
-            issueService.deleteById(issueId);
-            return tempIssue.get();
-        }else{
-            throw new RuntimeException("issue id not found - " + issueId);
-        }
+    public void deleteIssue(@PathVariable int issueId) {
+        issueService.deleteById(issueId);
     }
 }
