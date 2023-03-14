@@ -114,7 +114,7 @@ public class RealEndPointTest {
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
         //assert issue was not found after deletion
-        dbQueries.selectAllFromDbByIdAndAssertThatItIsEmpty(id);
+        dbQueries.assertNotFoundInDb(id);
     }
 
     @Test

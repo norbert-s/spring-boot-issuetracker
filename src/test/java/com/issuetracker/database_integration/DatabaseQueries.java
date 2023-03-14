@@ -11,7 +11,9 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Optional;
 
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Component
 public class DatabaseQueries {
@@ -21,16 +23,14 @@ public class DatabaseQueries {
 
     public void deleteFromDbAndAssertDeletionSuccessful(int deletedId) {
         jdbc.execute(" delete from issue where id=" + deletedId);
-        selectAllFromDbByIdAndAssertThatItIsEmpty(deletedId);
+        assertNotFoundInDb(deletedId);
     }
 
-    public void selectAllFromDbByIdAndAssertThatItIsEmpty(int deletedId) {
-        Optional<List<Issue>> returnedIssueAfterDeletion = Optional.ofNullable(jdbc.query("SELECT * from issue where id=" + deletedId, new IssueRowMapper()));
+    public void assertNotFoundInDb(int id) {
+        Optional<List<Issue>> returnedIssueAfterDeletion = Optional.ofNullable(jdbc.query("SELECT * from issue where id=" + id, new IssueRowMapper()));
         if(returnedIssueAfterDeletion.isPresent()){
-            assertEquals(0, returnedIssueAfterDeletion.get().size(), "an issue has been found by above id " + deletedId + " , when it was supposed to have been already deleted");
-            LOGGER.info("issue has been successfully deleted -> id "+deletedId);
-        }else{
-            throw new RuntimeException("issue was not deleted from the db"+deletedId);
+            assertTrue(returnedIssueAfterDeletion.get().isEmpty(),"an issue has been found by above id " + id + " , when it was supposed to have been already deleted");
+            LOGGER.info("issue has been correctly not found "+id);
         }
     }
 

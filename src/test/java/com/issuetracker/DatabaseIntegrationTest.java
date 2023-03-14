@@ -5,11 +5,9 @@ import com.issuetracker.dataJpa.entity.Issue;
 import com.issuetracker.dataJpa.service.IssueService;
 import com.issuetracker.database_integration.DatabaseQueries;
 import com.issuetracker.issue_object_generator.IssuePOJO;
-import com.issuetracker.listeners.Listener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -21,7 +19,6 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 
 @TestPropertySource("/dev.properties")
-@ExtendWith(Listener.class)
 @SpringBootTest
 @Tag("db_integration_tests")
 @Tag("sanity")
@@ -97,7 +94,7 @@ public class DatabaseIntegrationTest {
 
         //assert deletion was successfull by sql
         int deletedId = createdDbEntry.get().getId();
-        dbQueries.selectAllFromDbByIdAndAssertThatItIsEmpty(deletedId);
+        dbQueries.assertNotFoundInDb(deletedId);
     }
     @AfterEach
     public void tearDown(){
