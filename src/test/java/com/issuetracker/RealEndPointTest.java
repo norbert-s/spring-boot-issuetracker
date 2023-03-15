@@ -11,6 +11,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,8 +30,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @Import(MyTestConfig.class)
 @TestPropertySource("/dev.properties")
 @Tag("sanity")
+@Tag("real-endpoint")
 public class RealEndPointTest {
-    protected static final Logger LOGGER = LogManager.getLogger(RealEndPointTest.class);
+    private static final Logger LOGGER = LogManager.getLogger(RealEndPointTest.class);
 
     @Autowired
     private TestRestTemplate restTemplate;

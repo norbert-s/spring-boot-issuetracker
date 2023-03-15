@@ -5,8 +5,9 @@ import com.issuetracker.dataJpa.entity.Issue;
 import com.issuetracker.dataJpa.exceptionhandling.exceptions.IssueDeleteException;
 import com.issuetracker.dataJpa.exceptionhandling.exceptions.IssueNotFoundException;
 import com.issuetracker.dataJpa.exceptionhandling.exceptions.IssueSaveException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +16,8 @@ import java.util.Optional;
 
 @Service
 public class IssueServiceImpl implements IssueService {
-    protected static final Logger LOGGER = LogManager.getLogger(IssueServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(IssueServiceImpl.class);
+
     private IssueDao issueDao;
     @Autowired
     public IssueServiceImpl(IssueDao issueDao) {
@@ -42,10 +44,12 @@ public class IssueServiceImpl implements IssueService {
 
     @Override
     public Issue save(Issue theIssue) {
+
         theIssue.setId(0);
-        Optional<Issue> createdIssue = Optional.ofNullable(issueDao.save(theIssue));
-        if(createdIssue.isPresent()){
-            return createdIssue.get();
+        Issue createdIssue = issueDao.save(theIssue);
+        if(createdIssue!=null){
+            LOGGER.info("issue created "+theIssue);
+            return createdIssue;
         }else{
             throw new IssueSaveException("issue could not be saved in the database " +  theIssue);
         }

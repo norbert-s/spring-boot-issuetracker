@@ -1,12 +1,10 @@
 package com.issuetracker;
 
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.issuetracker.dataJpa.dao.IssueDao;
+
 import com.issuetracker.dataJpa.entity.Issue;
 import com.issuetracker.dataJpa.service.IssueService;
-import com.issuetracker.database_integration.DatabaseQueries;
 import com.issuetracker.issue_object_generator.IssuePOJO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,12 +12,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -34,43 +32,36 @@ import java.util.stream.IntStream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @TestPropertySource("/dev.properties")
 @AutoConfigureMockMvc
+
 @SpringBootTest
 @Tag("mocking-controllers")
 @Tag("sanity")
 //@WebMvcTest(IssueRestControllerTest.class)
-public class MockingRestControllersTest {
-    protected static final Logger LOGGER = LogManager.getLogger(MockingRestControllersTest.class);
+public class MockingWebLayerWithRestControllers {
+    private static final Logger LOGGER = LogManager.getLogger(MockingWebLayerWithRestControllers.class);
 
     @Autowired
     private WebApplicationContext webApplicationContext;
 
     private MockMvc mockMvc;
 
-    @Autowired
-    IssueService issueService;
-
-    @Autowired
-    private JdbcTemplate jdbc;
-
     @MockBean
-    private IssueDao issueDao;
-
+    IssueService issueService;
 
     @Autowired
     ObjectMapper objectMapper;
 
-
-    public static final MediaType APPLICATION_JSON_UTF8 = MediaType.APPLICATION_JSON;
-
-    @Autowired
-    private DatabaseQueries dbQueries;
+    private static final MediaType APPLICATION_JSON_UTF8 = MediaType.APPLICATION_JSON;
 
     private Issue testIssue;
+
+
 
     @BeforeEach
     public void setup() {
@@ -80,21 +71,20 @@ public class MockingRestControllersTest {
 
     @Test
     public void findById() throws Exception {
-        when(issueDao.findById(3))
+        when(issueService.findById(3))
             .thenReturn(testIssue);
         MvcResult resutl = mockMvc.perform(MockMvcRequestBuilders.get("/api/issues/{id}" ,3))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$.title", is(testIssue.getTitle())))
-                .andExpect(jsonPath("$.title", is(testIssue.getTitle())))
                 .andExpect(jsonPath("$.description", is(testIssue.getDescription())))
-                .andExpect(jsonPath("$.assigneeName", is(testIssue.getAssigneeName())))
+                .andExpect(jsonPath("$.assignee_name", is(testIssue.getAssigneeName())))
                 .andExpect(jsonPath("$.status", is(testIssue.getStatus()))).andReturn();
         LOGGER.info(resutl.getResponse().getContentAsString());
     }
-
+//
     @Test
-    public void findAll() throws Exception {
+    public void findAllIssues() throws Exception {
         int expectedSize = 5;
         List<Issue> issues = new ArrayList<>();
         IntStream.range(1,expectedSize+1).forEach(s->{
@@ -102,7 +92,7 @@ public class MockingRestControllersTest {
             issue.setId(s);
             issues.add(issue);
         });
-        when(issueDao.findAll())
+        when(issueService.findAll())
                 .thenReturn(issues);
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/api/issues"))
                 .andExpect(status().isOk())
@@ -114,6 +104,39 @@ public class MockingRestControllersTest {
         ObjectMapper objectMapper = new ObjectMapper();
         List<Issue> list = objectMapper.readValue(responseJson, new TypeReference<List<Issue>>(){});
         assertThat(list, hasSize(expectedSize));
+    }
+
+    @Test
+    public void saveIssue() throws Exception {
+        testIssue.setId(1);
+        when(issueService.save(testIssue))
+                .thenReturn(testIssue);
+
+        String payload = objectMapper.writeValueAsString(testIssue);
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/api/issues")
+                        .content(payload)
+                        .contentType(APPLICATION_JSON_UTF8))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+                .andReturn();
+
+        LOGGER.info(result.getResponse().getContentAsString());
+        String responseJson = result.getResponse().getContentAsString();
+        ObjectMapper objectMapper = new ObjectMapper();
+        Issue returnedIssue = objectMapper.readValue(responseJson, Issue.class);
+        testIssue.equals(returnedIssue);
+        verify(issueService, times(1)).save(testIssue);
+    }
+
+    @Test
+    public void testDeleteIssue() throws Exception {
+        int testIssueId = testIssue.getId();
+        doNothing().when(issueService).deleteById(testIssueId);
+
+        mockMvc.perform(delete("/api/issues/{id}", testIssueId))
+                .andExpect(status().isOk());
+
+        verify(issueService, times(1)).deleteById(testIssueId);
     }
 
     @AfterEach
