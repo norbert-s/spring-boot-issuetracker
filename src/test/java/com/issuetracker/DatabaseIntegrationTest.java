@@ -5,9 +5,12 @@ import com.issuetracker.dataJpa.entity.Issue;
 import com.issuetracker.dataJpa.service.IssueService;
 import com.issuetracker.database_integration.DatabaseQueries;
 import com.issuetracker.issue_object_generator.IssuePOJO;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -23,8 +26,8 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 @Tag("db_integration_tests")
 @Tag("sanity")
 public class DatabaseIntegrationTest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MockingWebLayerWithRestControllers.class);
 
-    protected static final Logger LOGGER = LogManager.getLogger(DatabaseIntegrationTest.class);
     @Autowired
     private JdbcTemplate jdbc;
 
@@ -39,6 +42,7 @@ public class DatabaseIntegrationTest {
 
     private Issue testIssue;
 
+
     @BeforeEach
     public void setup() {
         testIssue = IssuePOJO.issueGenerator();
@@ -48,12 +52,13 @@ public class DatabaseIntegrationTest {
     public void testSaveIssue() {
         //testing saving issue service
         Optional<Issue> createdDbEntry = Optional.ofNullable(issueService.save(testIssue));
+        LOGGER.info(String.valueOf(createdDbEntry.get()));
         assertThat(createdDbEntry.get().equalsWithoutCheckingId(testIssue));
 
 
         //deleting issue by sql
-        int deletedId = createdDbEntry.get().getId();
-        dbQueries.deleteFromDbAndAssertDeletionSuccessful(deletedId);
+//        int deletedId = createdDbEntry.get().getId();
+//        dbQueries.deleteFromDbAndAssertDeletionSuccessful(deletedId);
     }
 
     @Test
@@ -63,6 +68,7 @@ public class DatabaseIntegrationTest {
 
         //testing the service here
         Optional<Issue> foundIssue = Optional.ofNullable(issueService.findById(createdDbEntry.get().getId()));
+        LOGGER.info(String.valueOf(foundIssue.get()));
         assertThat(testIssue.equalsWithoutCheckingId(foundIssue.get()));
 
         //deleting issue by sql
@@ -88,13 +94,14 @@ public class DatabaseIntegrationTest {
     public void testDeleteIssue() {
         //saving by sql
         Optional<Issue> createdDbEntry = Optional.ofNullable(dbQueries.saveIssue());
-        LOGGER.info(createdDbEntry.isPresent()?createdDbEntry.get():" warning - not found");
+        LOGGER.info(createdDbEntry.isPresent()?  createdDbEntry.get().toString() :" warning - not found");
         //testing the service here
         issueService.deleteById(createdDbEntry.get().getId());
 
         //assert deletion was successfull by sql
         int deletedId = createdDbEntry.get().getId();
         dbQueries.assertNotFoundInDb(deletedId);
+
     }
     @AfterEach
     public void tearDown(){

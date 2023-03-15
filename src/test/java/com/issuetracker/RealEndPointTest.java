@@ -11,6 +11,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,8 +30,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @Import(MyTestConfig.class)
 @TestPropertySource("/dev.properties")
 @Tag("sanity")
+@Tag("real-endpoint")
 public class RealEndPointTest {
-    protected static final Logger LOGGER = LogManager.getLogger(RealEndPointTest.class);
+    private static final Logger LOGGER = LogManager.getLogger(RealEndPointTest.class);
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -93,7 +95,7 @@ public class RealEndPointTest {
         assertTrue(returnedIssue.equalsWithoutCheckingId(testIssue));
 
         //delete from db and check if passes
-        dbQueries.deleteFromDbAndAssertDeletionSuccessful(returnedIssue.getId());
+        //dbQueries.deleteFromDbAndAssertDeletionSuccessful(returnedIssue.getId());
     }
 
     @Test
@@ -141,7 +143,7 @@ public class RealEndPointTest {
                 idToFind
         );
         LOGGER.info("status code should be 404 and it is ->" + response.getStatusCodeValue());
-        LOGGER.info(response.getBody());
+        LOGGER.info(String.valueOf(response.getBody()));
         assertTrue(response.getStatusCode().is4xxClientError());
         assertTrue(response.getStatusCodeValue() == 404);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());

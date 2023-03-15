@@ -1,5 +1,7 @@
 package com.issuetracker.dataJpa.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -24,6 +26,7 @@ public class Issue {
     String description;
 
     @Column(name = "assignee_name")
+    @JsonProperty("assignee_name")
     String assigneeName;
 
     @Column(name = "status")
@@ -92,7 +95,7 @@ public class Issue {
 
     @Override
     public String toString() {
-        return "Issue{" +
+        return "Issue {" +
                 "id=" + id +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +

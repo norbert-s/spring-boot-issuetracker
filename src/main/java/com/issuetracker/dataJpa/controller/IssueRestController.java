@@ -1,5 +1,7 @@
 package com.issuetracker.dataJpa.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.issuetracker.dataJpa.entity.Issue;
 import com.issuetracker.dataJpa.service.IssueService;
 import org.apache.logging.log4j.LogManager;
