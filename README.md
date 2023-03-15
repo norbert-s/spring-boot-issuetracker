@@ -2,6 +2,8 @@
 
 The app is unit/integration/db integration tested, tested with mockMvc and the real endpoints are also tested.
 
+these test can be run by "mvn test -Dgroups=sanity"
+
 
 The app is also dockerized.
 
