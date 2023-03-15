@@ -95,7 +95,7 @@ public class RealEndPointTest {
         assertTrue(returnedIssue.equalsWithoutCheckingId(testIssue));
 
         //delete from db and check if passes
-        //dbQueries.deleteFromDbAndAssertDeletionSuccessful(returnedIssue.getId());
+        dbQueries.deleteFromDbAndAssertDeletionSuccessful(returnedIssue.getId());
     }
 
     @Test
@@ -143,7 +143,7 @@ public class RealEndPointTest {
                 idToFind
         );
         LOGGER.info("status code should be 404 and it is ->" + response.getStatusCodeValue());
-        LOGGER.info(String.valueOf(response.getBody()));
+        LOGGER.info(response.getBody());
         assertTrue(response.getStatusCode().is4xxClientError());
         assertTrue(response.getStatusCodeValue() == 404);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());

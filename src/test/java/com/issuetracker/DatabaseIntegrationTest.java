@@ -57,8 +57,8 @@ public class DatabaseIntegrationTest {
 
 
         //deleting issue by sql
-//        int deletedId = createdDbEntry.get().getId();
-//        dbQueries.deleteFromDbAndAssertDeletionSuccessful(deletedId);
+        int deletedId = createdDbEntry.get().getId();
+        dbQueries.deleteFromDbAndAssertDeletionSuccessful(deletedId);
     }
 
     @Test
@@ -68,7 +68,7 @@ public class DatabaseIntegrationTest {
 
         //testing the service here
         Optional<Issue> foundIssue = Optional.ofNullable(issueService.findById(createdDbEntry.get().getId()));
-        LOGGER.info(String.valueOf(foundIssue.get()));
+        LOGGER.info(foundIssue.get().toString());
         assertThat(testIssue.equalsWithoutCheckingId(foundIssue.get()));
 
         //deleting issue by sql
