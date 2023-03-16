@@ -1,16 +1,15 @@
-package com.issuetracker;
+package com.issuetracker.tests.integration;
 
-import com.issuetracker.dataJpa.dao.IssueDao;
 import com.issuetracker.dataJpa.entity.Issue;
 import com.issuetracker.dataJpa.service.IssueService;
-import com.issuetracker.database_integration.DatabaseQueries;
+import com.issuetracker.sql_queries.DatabaseQueries;
 import com.issuetracker.issue_object_generator.IssuePOJO;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -19,20 +18,18 @@ import org.springframework.test.context.TestPropertySource;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 @TestPropertySource("/dev.properties")
 @SpringBootTest
 @Tag("db_integration_tests")
 @Tag("sanity")
-public class DatabaseIntegrationTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MockingWebLayerWithRestControllers.class);
+public class ServiceLayerDaoIntegrationTest {
+    private static final Logger LOGGER = LogManager.getLogger(ServiceLayerDaoIntegrationTest.class);
 
     @Autowired
     private JdbcTemplate jdbc;
-
-    @Autowired
-    private IssueDao issueDao;
 
     @Autowired
     private IssueService issueService;
@@ -75,21 +72,6 @@ public class DatabaseIntegrationTest {
         int deletedId = createdDbEntry.get().getId();
         dbQueries.deleteFromDbAndAssertDeletionSuccessful(deletedId);
     }
-
-    @Test
-    public void testFindIssueByIdByDao() {
-        //saving by sql
-        Optional<Issue> createdDbEntry = Optional.ofNullable(dbQueries.saveIssue());
-
-        //testing the service here
-        Optional<Issue> foundIssue = Optional.ofNullable(issueDao.findById(createdDbEntry.get().getId()));
-        assertThat(testIssue.equalsWithoutCheckingId(foundIssue.get()));
-
-        //deleting issue by sql
-        int deletedId = createdDbEntry.get().getId();
-        dbQueries.deleteFromDbAndAssertDeletionSuccessful(deletedId);
-    }
-
     @Test
     public void testDeleteIssue() {
         //saving by sql
@@ -101,7 +83,22 @@ public class DatabaseIntegrationTest {
         //assert deletion was successfull by sql
         int deletedId = createdDbEntry.get().getId();
         dbQueries.assertNotFoundInDb(deletedId);
+    }
 
+    @Test
+    public void testUpdateIssue() {
+        Optional<Issue> savedissue = Optional.ofNullable(dbQueries.saveIssue());
+        if(savedissue.isPresent()){
+            Issue issue = savedissue.get();
+            int idOfIssue = issue.getId();
+            Issue newIssue = IssuePOJO.issueGenerator();
+            newIssue.setId(idOfIssue);
+            Optional<Issue> foundIssue = Optional.ofNullable(issueService.updateById(idOfIssue, newIssue));
+            if(foundIssue.isPresent()){
+                assertTrue(foundIssue.get().equals(newIssue));
+                dbQueries.deleteFromDbAndAssertDeletionSuccessful(idOfIssue);
+            }
+        }
     }
     @AfterEach
     public void tearDown(){

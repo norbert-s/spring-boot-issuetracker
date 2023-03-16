@@ -1,9 +1,9 @@
-package com.issuetracker;
+package com.issuetracker.tests.integration;
 
 import com.issuetracker.config.MyTestConfig;
 import com.issuetracker.dataJpa.entity.Issue;
 import com.issuetracker.dataJpa.exceptionhandling.ErrorResponse;
-import com.issuetracker.database_integration.DatabaseQueries;
+import com.issuetracker.sql_queries.DatabaseQueries;
 import com.issuetracker.issue_object_generator.IssuePOJO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,8 +31,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestPropertySource("/dev.properties")
 @Tag("sanity")
 @Tag("real-endpoint")
-public class RealEndPointTest {
-    private static final Logger LOGGER = LogManager.getLogger(RealEndPointTest.class);
+public class RealEndPointDatabaseIntegrationTest {
+    private static final Logger LOGGER = LogManager.getLogger(RealEndPointDatabaseIntegrationTest.class);
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -132,7 +132,6 @@ public class RealEndPointTest {
     }
 
     @Test
-    @Tag("current")
     public void idShouldNotBeFound() {
         int idToFind = 0;
         ResponseEntity<ErrorResponse> response = restTemplate.exchange(
@@ -152,6 +151,35 @@ public class RealEndPointTest {
         assertEquals(HttpStatus.NOT_FOUND.value(), errorResponse.getStatus());
         assertEquals("Did not find issue with given id " + idToFind, errorResponse.getMessage());
         assertNotNull(errorResponse.getTimestamp());
+    }
+
+    @Test
+    public void updateIssue() {
+        //save an issue to db
+        Optional<Issue> savedIssue = Optional.ofNullable(dbQueries.saveIssue());
+        int idToFind = savedIssue.get().getId();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/json");
+
+        //set up a new Issue
+        testIssue.setId(idToFind);
+        HttpEntity<Issue> requestEntity = new HttpEntity<>(testIssue, headers);
+
+        ResponseEntity<Issue> response = restTemplate.exchange(
+                protocol + hostName + ":" + serverPort + "/api/issues/{id}",
+                HttpMethod.PUT,
+                requestEntity,
+                Issue.class,
+                idToFind
+        );
+
+        //find the new issue
+        Optional<Issue> foundIssue = Optional.ofNullable(dbQueries.findIssueById(idToFind));
+        assertTrue(foundIssue.get().equals(testIssue));
+
+        //delete the issue
+        dbQueries.deleteFromDbAndAssertDeletionSuccessful(idToFind);
     }
 
     @AfterEach
