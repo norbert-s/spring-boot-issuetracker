@@ -34,6 +34,7 @@ import java.util.stream.IntStream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -141,6 +142,28 @@ public class MockingWebLayerWithRestControllers {
                 .andExpect(status().isOk());
 
         verify(issueService, times(1)).deleteById(testIssueId);
+    }
+
+    @Test
+    public void testUpdateIssue() throws Exception {
+        testIssue.setId(1);
+        when(issueService.updateById(testIssue.getId(),testIssue))
+                .thenReturn(testIssue);
+
+        String payload = objectMapper.writeValueAsString(testIssue);
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.put("/api/issues/{issueId}",1)
+                        .content(payload)
+                        .contentType(APPLICATION_JSON_UTF8))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+                .andReturn();
+
+        LOGGER.info(result.getResponse().getContentAsString());
+        String responseJson = result.getResponse().getContentAsString();
+        ObjectMapper objectMapper = new ObjectMapper();
+        Issue returnedIssue = objectMapper.readValue(responseJson, Issue.class);
+        assertTrue(testIssue.equals(returnedIssue));
+        verify(issueService, times(1)).updateById(testIssue.getId(), testIssue);
     }
 
     @AfterEach
