@@ -5,8 +5,8 @@ import com.issuetracker.dataJpa.entity.Issue;
 import com.issuetracker.dataJpa.exceptionhandling.exceptions.IssueDeleteException;
 import com.issuetracker.dataJpa.exceptionhandling.exceptions.IssueNotFoundException;
 import com.issuetracker.dataJpa.exceptionhandling.exceptions.IssueSaveException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ import java.util.Optional;
 
 @Service
 public class IssueServiceImpl implements IssueService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(IssueServiceImpl.class);
+    private static final Logger LOGGER = LogManager.getLogger(IssueServiceImpl.class);
 
     private IssueDao issueDao;
     @Autowired
@@ -44,12 +44,11 @@ public class IssueServiceImpl implements IssueService {
 
     @Override
     public Issue save(Issue theIssue) {
-
         theIssue.setId(0);
-        Issue createdIssue = issueDao.save(theIssue);
-        if(createdIssue!=null){
-            LOGGER.info("issue created "+theIssue);
-            return createdIssue;
+        Optional<Issue> createdIssue = Optional.of(issueDao.save(theIssue));
+        if(createdIssue.isPresent()){
+            LOGGER.info("issue has been saved "+theIssue);
+            return createdIssue.get();
         }else{
             throw new IssueSaveException("issue could not be saved in the database " +  theIssue);
         }
@@ -68,14 +67,18 @@ public class IssueServiceImpl implements IssueService {
         }
     }
 
-//    @Override
-//    public Issue updateById(int id, Issue newIssue) {
-//        Optional<Issue> foundIssue = Optional.ofNullable(findById(id));
-//        if(foundIssue.isPresent()){
-//            newIssue.setId(foundIssue.get().getId());
-//            return issueDao.updateById(id,newIssue);
-//        }else{
-//            throw new RuntimeException("issue was not in the database");
-//        }
-//    }
+    @Override
+    public Issue updateById(int id, Issue newIssue) {
+        Optional<Issue> foundIssue = Optional.ofNullable(issueDao.findById(id));
+        if(foundIssue.isPresent()){
+            newIssue.setId(id);
+            LOGGER.info("issue has been found with id "+ id);
+            LOGGER.info("old issue "+foundIssue);
+            LOGGER.info("new issue "+newIssue);
+            return issueDao.save(newIssue);
+        }
+        else{
+            throw new IssueNotFoundException("issue is not in the database");
+        }
+    }
 }

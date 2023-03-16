@@ -14,4 +14,5 @@ public interface IssueService {
     public void deleteById(int theId);
 
 
+    Issue updateById(int id, Issue newIssue);
 }

@@ -1,4 +1,4 @@
-package com.issuetracker;
+package com.issuetracker.tests.mocking;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,13 +12,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.slf4j.LoggerFactory;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -42,7 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @Tag("mocking-controllers")
 @Tag("sanity")
-//@WebMvcTest(IssueRestControllerTest.class)
+@ExtendWith(SpringExtension.class)
 public class MockingWebLayerWithRestControllers {
     private static final Logger LOGGER = LogManager.getLogger(MockingWebLayerWithRestControllers.class);
 
@@ -81,6 +83,7 @@ public class MockingWebLayerWithRestControllers {
                 .andExpect(jsonPath("$.assignee_name", is(testIssue.getAssigneeName())))
                 .andExpect(jsonPath("$.status", is(testIssue.getStatus()))).andReturn();
         LOGGER.info(resutl.getResponse().getContentAsString());
+        verify(issueService, times(1)).findById(3);
     }
 //
     @Test
@@ -104,6 +107,7 @@ public class MockingWebLayerWithRestControllers {
         ObjectMapper objectMapper = new ObjectMapper();
         List<Issue> list = objectMapper.readValue(responseJson, new TypeReference<List<Issue>>(){});
         assertThat(list, hasSize(expectedSize));
+        verify(issueService, times(1)).findAll();
     }
 
     @Test

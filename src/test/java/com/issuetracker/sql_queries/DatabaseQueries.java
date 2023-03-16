@@ -1,4 +1,4 @@
-package com.issuetracker.database_integration;
+package com.issuetracker.sql_queries;
 
 import com.issuetracker.dataJpa.entity.Issue;
 import com.issuetracker.issue_object_generator.IssuePOJO;
@@ -32,6 +32,17 @@ public class DatabaseQueries {
             assertTrue(returnedIssueAfterDeletion.get().isEmpty(),"an issue has been found by above id " + id + " , when it was supposed to have been already deleted");
             LOGGER.info("issue has been correctly not found "+id);
         }
+    }
+
+    public Issue findIssueById(int id) {
+        Optional<List<Issue>> foundIssue = Optional.ofNullable(jdbc.query("SELECT * from issue where id=" + id, new IssueRowMapper()));
+        if(foundIssue.isPresent()){
+            LOGGER.info("issue has been found "+id);
+            return foundIssue.get().get(0);
+        }else{
+            LOGGER.info("issue has been not found in the db "+id);
+        }
+        return null;
     }
 
     public Issue saveIssue() {
