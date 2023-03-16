@@ -1,6 +1,6 @@
 # spring-boot-issuetracker
 
-The app is unit/integration/db integration tested, tested with mockMvc and the real endpoints are also tested.
+The app is unit tested - testing the service and dao layer methods in isolation by mocking, and integration/db integration tested, and the real endpoints are also tested.
 
 these test can be run by "mvn test -Dgroups=sanity"
 
