@@ -13,7 +13,7 @@ I will be creating Suppliers to throw and will be using those in the Optional "o
 
 then it is going to look like this
 
-List<Issue> issues = Optional.ofNullable(issueDao.findAllByAuthor(issue.getAuthor())).orElseThrow(ThrowsWhenIssue.isNotPresent);
+List<Issue> issues = Optional.ofNullable(issueDao.findAllByAssignee(issue.getAssignee())).orElseThrow(ThrowsWhenIssue.isNotPresent);
 
 Optionally, it is also feasible for me to 
 
