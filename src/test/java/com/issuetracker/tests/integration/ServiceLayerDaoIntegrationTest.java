@@ -2,17 +2,15 @@ package com.issuetracker.tests.integration;
 
 import com.issuetracker.dataJpa.entity.Issue;
 import com.issuetracker.dataJpa.service.IssueService;
-import com.issuetracker.sql_queries.DatabaseQueries;
-import com.issuetracker.issue_object_generator.IssuePOJO;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.issuetracker.helpers.issue_object_generator.IssuePOJO;
+import com.issuetracker.helpers.sql_queries.DatabaseQueries;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.Optional;
@@ -22,14 +20,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 @TestPropertySource("/dev.properties")
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, properties = {"server.port=5007"})
 @Tag("db_integration_tests")
 @Tag("sanity")
+@Slf4j
 public class ServiceLayerDaoIntegrationTest {
-    private static final Logger LOGGER = LogManager.getLogger(ServiceLayerDaoIntegrationTest.class);
-
-    @Autowired
-    private JdbcTemplate jdbc;
 
     @Autowired
     private IssueService issueService;
@@ -49,7 +44,7 @@ public class ServiceLayerDaoIntegrationTest {
     public void testSaveIssue() {
         //testing saving issue service
         Optional<Issue> createdDbEntry = Optional.ofNullable(issueService.save(testIssue));
-        LOGGER.info(String.valueOf(createdDbEntry.get()));
+        log.info(String.valueOf(createdDbEntry.get()));
         assertThat(createdDbEntry.get().equalsWithoutCheckingId(testIssue));
 
 
@@ -65,7 +60,7 @@ public class ServiceLayerDaoIntegrationTest {
 
         //testing the service here
         Optional<Issue> foundIssue = Optional.ofNullable(issueService.findById(createdDbEntry.get().getId()));
-        LOGGER.info(foundIssue.get().toString());
+        log.info(foundIssue.get().toString());
         assertThat(testIssue.equalsWithoutCheckingId(foundIssue.get()));
 
         //deleting issue by sql
@@ -76,7 +71,7 @@ public class ServiceLayerDaoIntegrationTest {
     public void testDeleteIssue() {
         //saving by sql
         Optional<Issue> createdDbEntry = Optional.ofNullable(dbQueries.saveIssue());
-        LOGGER.info(createdDbEntry.isPresent()?  createdDbEntry.get().toString() :" warning - not found");
+        log.info(createdDbEntry.isPresent()?  createdDbEntry.get().toString() :" warning - not found");
         //testing the service here
         issueService.deleteById(createdDbEntry.get().getId());
 

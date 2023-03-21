@@ -1,18 +1,17 @@
-package com.issuetracker.sql_queries;
+package com.issuetracker.helpers.sql_queries;
 
 import com.issuetracker.dataJpa.entity.Issue;
-import com.issuetracker.issue_object_generator.IssuePOJO;
-import com.issuetracker.row_mapper.IssueRowMapper;
+import com.issuetracker.helpers.issue_object_generator.IssuePOJO;
+import com.issuetracker.helpers.row_mapper.IssueRowMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Optional;
 
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Component

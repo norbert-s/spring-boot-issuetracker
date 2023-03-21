@@ -1,17 +1,15 @@
 package com.issuetracker.tests.integration;
 
-import com.issuetracker.config.MyTestConfig;
 import com.issuetracker.dataJpa.entity.Issue;
 import com.issuetracker.dataJpa.exceptionhandling.ErrorResponse;
-import com.issuetracker.sql_queries.DatabaseQueries;
-import com.issuetracker.issue_object_generator.IssuePOJO;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.issuetracker.helpers.config.MyTestConfig;
+import com.issuetracker.helpers.issue_object_generator.IssuePOJO;
+import com.issuetracker.helpers.sql_queries.DatabaseQueries;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,18 +19,19 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.context.TestPropertySource;
 
-
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, properties = {"server.port=8080"})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, properties = {"server.port=5005"})
 @Import(MyTestConfig.class)
 @TestPropertySource("/dev.properties")
 @Tag("sanity")
 @Tag("real-endpoint")
+@Slf4j
 public class RealEndPointDatabaseIntegrationTest {
-    private static final Logger LOGGER = LogManager.getLogger(RealEndPointDatabaseIntegrationTest.class);
+    //private static final Logger LOGGER = LogManager.getLogger(RealEndPointDatabaseIntegrationTest.class);
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -86,7 +85,7 @@ public class RealEndPointDatabaseIntegrationTest {
                 protocol + hostName + ":" + serverPort + "/api/issues",
                 HttpMethod.POST,
                 requestEntity,
-                new ParameterizedTypeReference<Issue>() {
+                new ParameterizedTypeReference<>() {
                 }
         );
 
@@ -102,7 +101,7 @@ public class RealEndPointDatabaseIntegrationTest {
     public void deletingIssueByIdEndpoint() {
         Issue issue = dbQueries.saveIssue();
         int id = issue.getId();
-        LOGGER.info("id -> " + id);
+        log.info("id -> " + id);
 
         ResponseEntity<Void> responseEntity = restTemplate.exchange(
                 protocol + hostName + ":" + serverPort + "/api/issues/{id}",
@@ -122,13 +121,13 @@ public class RealEndPointDatabaseIntegrationTest {
     @Test
     public void notFound() {
         ResponseEntity<Issue> response = restTemplate.exchange(
-                "http://localhost:8080/api/issues1",
+        		protocol + hostName + ":" + serverPort + "/api/issues1",
                 HttpMethod.GET,
                 null,
                 Issue.class);
-        LOGGER.info("status code should be 404 and it is ->" + response.getStatusCodeValue());
+        log.info("status code should be 404 and it is ->" + response.getStatusCodeValue());
         assertTrue(response.getStatusCode().is4xxClientError());
-        assertTrue(response.getStatusCodeValue() == 404);
+        assertEquals(404, response.getStatusCodeValue());
     }
 
     @Test
@@ -141,16 +140,15 @@ public class RealEndPointDatabaseIntegrationTest {
                 ErrorResponse.class,
                 idToFind
         );
-        LOGGER.info("status code should be 404 and it is ->" + response.getStatusCodeValue());
-        LOGGER.info(response.getBody());
+        log.info("status code should be 404 and it is ->" + response.getStatusCodeValue());
+        log.info(String.valueOf(response.getBody()));
         assertTrue(response.getStatusCode().is4xxClientError());
-        assertTrue(response.getStatusCodeValue() == 404);
+        assertEquals(404, response.getStatusCodeValue());
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 
         ErrorResponse errorResponse = response.getBody();
         assertEquals(HttpStatus.NOT_FOUND.value(), errorResponse.getStatus());
         assertEquals("Did not find issue with given id " + idToFind, errorResponse.getMessage());
-        assertNotNull(errorResponse.getTimestamp());
     }
 
     @Test

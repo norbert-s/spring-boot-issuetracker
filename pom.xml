@@ -15,6 +15,7 @@
     <description>issuetracker</description>
     <properties>
         <java.version>11</java.version>
+        <groupsParam>sanity</groupsParam>
     </properties>
     <packaging>jar</packaging>
     <dependencies>
@@ -60,6 +61,19 @@
             <version>2.18.0</version>
         </dependency>
 
+            <!-- Other dependencies -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>5.8.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
 
     </dependencies>
 
@@ -94,8 +108,9 @@
                             implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5Xml30StatelessReporter">
                         <usePhrasedTestCaseMethodName>true</usePhrasedTestCaseMethodName>
                     </statelessTestsetReporter>
-                    <groups>${groups}</groups>
-                    <argLine>-Dlog4j.configurationFile=G:\OneDrive\javaprojects\spring-boot-issuetracker\src\main\resources\log4j2.xml</argLine>
+                    <systemPropertyVariables>
+                        <groupsParam>${groups}</groupsParam>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
         </plugins>
