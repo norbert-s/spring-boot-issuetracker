@@ -1,5 +1,14 @@
 # spring-boot-issuetracker
 
+update-2023.03.21
+
+updated with lombok
+
+next I will probably be refactoring part of the test based on this article (https://stackoverflow.com/questions/38954742/assert-that-optional-has-certain-value), even though when an optional result is empty then when calling an "get()" on it will result in an exception thrown. I will look into how to improve that part - if necessary.
+
+
+---------------------------------------------------------------------
+
 The app is unit tested - testing the service and dao layer methods in isolation by mocking, and integration/db integration tested, and the real endpoints are also tested.
 
 these test can be run by "mvn test -Dgroups=sanity"
