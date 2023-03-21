@@ -1,4 +1,4 @@
-package com.issuetracker.config;
+package com.issuetracker.helpers.config;
 
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Bean;

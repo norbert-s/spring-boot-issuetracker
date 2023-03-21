@@ -5,9 +5,7 @@ import com.issuetracker.dataJpa.entity.Issue;
 import com.issuetracker.dataJpa.exceptionhandling.exceptions.IssueDeleteException;
 import com.issuetracker.dataJpa.exceptionhandling.exceptions.IssueNotFoundException;
 import com.issuetracker.dataJpa.exceptionhandling.exceptions.IssueSaveException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,8 +13,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class IssueServiceImpl implements IssueService {
-    private static final Logger LOGGER = LogManager.getLogger(IssueServiceImpl.class);
+
 
     private IssueDao issueDao;
     @Autowired
@@ -32,9 +31,9 @@ public class IssueServiceImpl implements IssueService {
     @Override
     public Issue findById(int theId) {
         Optional<Issue> result = Optional.ofNullable(issueDao.findById(theId));
-        LOGGER.info("result "+result);
+        log.info("result "+result);
         if(result.isPresent()){
-            LOGGER.info("issue has been found with given id "+theId +" -> "+result.get());
+            log.info("issue has been found with given id "+theId +" -> "+result.get());
             return result.get();
         }
         else{
@@ -47,7 +46,7 @@ public class IssueServiceImpl implements IssueService {
         theIssue.setId(0);
         Optional<Issue> createdIssue = Optional.of(issueDao.save(theIssue));
         if(createdIssue.isPresent()){
-            LOGGER.info("issue has been saved "+theIssue);
+            log.info("issue has been saved "+theIssue);
             return createdIssue.get();
         }else{
             throw new IssueSaveException("issue could not be saved in the database " +  theIssue);
@@ -60,7 +59,7 @@ public class IssueServiceImpl implements IssueService {
         if(found.isPresent()){
             try{
                 issueDao.deleteById(theId);
-                LOGGER.info("issue has been deleted "+found.get());
+                log.info("issue has been deleted "+found.get());
             }catch (Exception e){
                 throw new IssueDeleteException("Issue with given id was found but could not delete it "+found.get());
             }
@@ -72,9 +71,9 @@ public class IssueServiceImpl implements IssueService {
         Optional<Issue> foundIssue = Optional.ofNullable(issueDao.findById(id));
         if(foundIssue.isPresent()){
             newIssue.setId(id);
-            LOGGER.info("issue has been found with id "+ id);
-            LOGGER.info("old issue "+foundIssue);
-            LOGGER.info("new issue "+newIssue);
+            log.info("issue has been found with id "+ id);
+            log.info("old issue "+foundIssue);
+            log.info("new issue "+newIssue);
             return issueDao.save(newIssue);
         }
         else{

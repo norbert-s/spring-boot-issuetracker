@@ -1,4 +1,4 @@
-package com.issuetracker.issue_object_generator;
+package com.issuetracker.helpers.issue_object_generator;
 
 import com.github.javafaker.Faker;
 import com.issuetracker.dataJpa.entity.Issue;
@@ -6,7 +6,7 @@ import com.issuetracker.dataJpa.entity.Issue;
 public class IssuePOJO {
     static Faker faker = new Faker();
 
-    public static Issue issueGenerator() {
+    synchronized public static Issue issueGenerator() {
         int id = 0;
         String description = faker.lorem().sentences(5).get(0);
         String title = faker.lorem().sentence();

@@ -2,12 +2,10 @@ package com.issuetracker.tests.mocking;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import com.issuetracker.dataJpa.entity.Issue;
 import com.issuetracker.dataJpa.service.IssueService;
-import com.issuetracker.issue_object_generator.IssuePOJO;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.issuetracker.helpers.issue_object_generator.IssuePOJO;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -20,7 +18,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -34,7 +31,7 @@ import java.util.stream.IntStream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -46,8 +43,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Tag("mocking-controllers")
 @Tag("sanity")
 @ExtendWith(SpringExtension.class)
-public class MockingWebLayerWithRestControllers {
-    private static final Logger LOGGER = LogManager.getLogger(MockingWebLayerWithRestControllers.class);
+@Slf4j
+public class MockingWebLayerWithRestControllersTest {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -83,7 +80,7 @@ public class MockingWebLayerWithRestControllers {
                 .andExpect(jsonPath("$.description", is(testIssue.getDescription())))
                 .andExpect(jsonPath("$.assignee_name", is(testIssue.getAssigneeName())))
                 .andExpect(jsonPath("$.status", is(testIssue.getStatus()))).andReturn();
-        LOGGER.info(resutl.getResponse().getContentAsString());
+        log.info(resutl.getResponse().getContentAsString());
         verify(issueService, times(1)).findById(3);
     }
 //
@@ -103,10 +100,11 @@ public class MockingWebLayerWithRestControllers {
                 .andExpect(content().contentType(APPLICATION_JSON_UTF8))
                         .andReturn();
 
-        LOGGER.info(result.getResponse().getContentAsString());
+        log.info(result.getResponse().getContentAsString());
         String responseJson = result.getResponse().getContentAsString();
         ObjectMapper objectMapper = new ObjectMapper();
-        List<Issue> list = objectMapper.readValue(responseJson, new TypeReference<List<Issue>>(){});
+        List<Issue> list = objectMapper.readValue(responseJson, new TypeReference<>() {
+        });
         assertThat(list, hasSize(expectedSize));
         verify(issueService, times(1)).findAll();
     }
@@ -125,11 +123,11 @@ public class MockingWebLayerWithRestControllers {
                 .andExpect(content().contentType(APPLICATION_JSON_UTF8))
                 .andReturn();
 
-        LOGGER.info(result.getResponse().getContentAsString());
+        log.info(result.getResponse().getContentAsString());
         String responseJson = result.getResponse().getContentAsString();
         ObjectMapper objectMapper = new ObjectMapper();
         Issue returnedIssue = objectMapper.readValue(responseJson, Issue.class);
-        testIssue.equals(returnedIssue);
+        assertEquals(testIssue, returnedIssue);
         verify(issueService, times(1)).save(testIssue);
     }
 
@@ -158,11 +156,11 @@ public class MockingWebLayerWithRestControllers {
                 .andExpect(content().contentType(APPLICATION_JSON_UTF8))
                 .andReturn();
 
-        LOGGER.info(result.getResponse().getContentAsString());
+        log.info(result.getResponse().getContentAsString());
         String responseJson = result.getResponse().getContentAsString();
         ObjectMapper objectMapper = new ObjectMapper();
         Issue returnedIssue = objectMapper.readValue(responseJson, Issue.class);
-        assertTrue(testIssue.equals(returnedIssue));
+        assertEquals(testIssue, returnedIssue);
         verify(issueService, times(1)).updateById(testIssue.getId(), testIssue);
     }
 

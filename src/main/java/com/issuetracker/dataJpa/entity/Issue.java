@@ -1,18 +1,23 @@
 package com.issuetracker.dataJpa.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Objects;
 
 
 @Entity
 @Table(name = "issue")
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@Slf4j
 public class Issue {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,70 +45,6 @@ public class Issue {
         this.status = status;
     }
 
-    public Issue(int id, String title, String description, String assignee_name, String status) {
-        this.id = id;
-        this.title = title;
-        this.description = description;
-        this.assigneeName = assignee_name;
-        this.status = status;
-    }
-
-    public Issue() {
-
-    }
-
-
-    public int getId() {
-        return id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getAssigneeName() {
-        return assigneeName;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setAssigneeName(String assignee_name) {
-        this.assigneeName = assignee_name;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    @Override
-    public String toString() {
-        return "Issue {" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", assignee_name='" + assigneeName + '\'' +
-                ", status='" + status + '\'' +
-                '}';
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -116,6 +57,8 @@ public class Issue {
         if (this == o) return true;
         if (!(o instanceof Issue)) return false;
         Issue issue = (Issue) o;
+        log.info("first object is "+this);
+        log.info("second object is "+issue);
         return Objects.equals(getTitle(), issue.getTitle()) && Objects.equals(getDescription(), issue.getDescription()) && Objects.equals(getAssigneeName(), issue.getAssigneeName()) && Objects.equals(getStatus(), issue.getStatus());
     }
 

@@ -1,4 +1,4 @@
-package com.issuetracker.row_mapper;
+package com.issuetracker.helpers.row_mapper;
 
 import com.issuetracker.dataJpa.entity.Issue;
 import org.springframework.jdbc.core.RowMapper;
