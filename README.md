@@ -2,9 +2,9 @@
 
 update-2023.03.21
 
-updated with lombok
+updated quality checks
 
-next I will probably be refactoring part of the test based on this article (https://stackoverflow.com/questions/38954742/assert-that-optional-has-certain-value), even though when an optional result is empty then when calling an "get()" on it will result in an exception thrown. I will look into how to improve that part - if necessary.
+next I will probably be refactoring part of the test based on this article (https://stackoverflow.com/questions/38954742/assert-that-optional-has-certain-value) that i have looked into before but found that some parts might be for change. I will have a look.
 
 
 ---------------------------------------------------------------------
