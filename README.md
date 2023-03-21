@@ -4,10 +4,15 @@ update-2023.03.21
 
 updated quality checks
 
-next I will probably be refactoring part of the test based on this article (https://stackoverflow.com/questions/38954742/assert-that-optional-has-certain-value) that i have looked into before but found that some parts might be for change. I will have a look.
-
-
 ---------------------------------------------------------------------
+UP NEXT
+
+I will probably be refactoring part of the test based on this article (https://stackoverflow.com/questions/38954742/assert-that-optional-has-certain-value) that i have looked into before but found that some parts might be for change. I will have a look.
+
+Also I will be creating tests to check the exceptions in isolation. Currently they are only checked in integration. It would have been better to check them in isolation.
+
+----------------------------------------------------------------------
+Information about the repo
 
 The app is unit tested - testing the service and dao layer methods in isolation by mocking, and integration/db integration tested, and the real endpoints are also tested.
 
