@@ -15,7 +15,7 @@
     <description>issuetracker</description>
     <properties>
         <java.version>11</java.version>
-        <groupsParam>sanity</groupsParam>
+        <groups>sanity</groups>
     </properties>
     <packaging>jar</packaging>
     <dependencies>
