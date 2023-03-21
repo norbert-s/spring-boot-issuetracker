@@ -1,15 +1,26 @@
 # spring-boot-issuetracker
 
-update-2023.03.21
-
-updated quality checks
-
----------------------------------------------------------------------
 UP NEXT
 
-I will probably be refactoring part of the test based on this article (https://stackoverflow.com/questions/38954742/assert-that-optional-has-certain-value) that i have looked into before but found that some parts might be for change. I will have a look.
+Because initially I was not satisfied with my approach of using optional-s in the tests, I started looking into it how it would be better.
 
-Also I will be creating tests to check the exceptions in isolation. Currently they are only checked in integration. It would have been better to check them in isolation.
+Also based on this article  (https://stackoverflow.com/questions/38954742/assert-that-optional-has-certain-value).
+
+And I found a different approch which is more to my liking in terms of usability, readability and also more concise.
+
+
+I will be creating Suppliers to throw and will be using those in the Optional "orElseThrow()" clause.
+
+then it is going to look like this
+
+List<Issue> issues = Optional.ofNullable(issueDao.findAllByAuthor(issue.getAuthor())).orElseThrow(ThrowsWhenIssue.isNotPresent);
+
+Optionally, it is also feasible for me to 
+
+
+---------------------------------------------------------------------
+
+Also I will be creating tests to check the exceptions in isolation. Currently they are only checked in integration. It would have been better to check them in isolation in the first place.
 
 ----------------------------------------------------------------------
 Information about the repo
