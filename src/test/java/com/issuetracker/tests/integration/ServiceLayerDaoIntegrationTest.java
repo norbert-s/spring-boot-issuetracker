@@ -4,6 +4,7 @@ import com.issuetracker.dataJpa.entity.Issue;
 import com.issuetracker.dataJpa.service.IssueService;
 import com.issuetracker.helpers.issue_object_generator.IssuePOJO;
 import com.issuetracker.helpers.sql_queries.DatabaseQueries;
+import com.issuetracker.tests.exceptions.ThrowsWhenIssue;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,58 +43,62 @@ public class ServiceLayerDaoIntegrationTest {
 
     @Test
     public void testSaveIssue() {
+
         //testing saving issue service
-        Optional<Issue> createdDbEntry = Optional.ofNullable(issueService.save(testIssue));
-        log.info(String.valueOf(createdDbEntry.get()));
-        assertThat(createdDbEntry.get().equalsWithoutCheckingId(testIssue));
+        //save issue service will throw if unsuccessful
+        Issue createdDbEntry = issueService.save(testIssue);
+        log.info(String.valueOf(createdDbEntry));
+        assertThat(createdDbEntry.equalsWithoutCheckingId(testIssue));
 
 
         //deleting issue by sql
-        int deletedId = createdDbEntry.get().getId();
+        int deletedId = createdDbEntry.getId();
         dbQueries.deleteFromDbAndAssertDeletionSuccessful(deletedId);
     }
 
     @Test
     public void testFindIssueById() {
         //saving by sql
-        Optional<Issue> createdDbEntry = Optional.ofNullable(dbQueries.saveIssue());
+        Issue createdDbEntry = Optional.ofNullable(dbQueries.saveIssue()).orElseThrow(ThrowsWhenIssue.isNotPresent);
 
         //testing the service here
-        Optional<Issue> foundIssue = Optional.ofNullable(issueService.findById(createdDbEntry.get().getId()));
-        log.info(foundIssue.get().toString());
-        assertThat(testIssue.equalsWithoutCheckingId(foundIssue.get()));
+        //findbyid throws if not found
+        Issue foundIssue = issueService.findById(createdDbEntry.getId());
+        log.info(foundIssue.toString());
+        assertThat(testIssue.equalsWithoutCheckingId(foundIssue));
 
         //deleting issue by sql
-        int deletedId = createdDbEntry.get().getId();
+        int deletedId = createdDbEntry.getId();
         dbQueries.deleteFromDbAndAssertDeletionSuccessful(deletedId);
     }
     @Test
     public void testDeleteIssue() {
         //saving by sql
-        Optional<Issue> createdDbEntry = Optional.ofNullable(dbQueries.saveIssue());
-        log.info(createdDbEntry.isPresent()?  createdDbEntry.get().toString() :" warning - not found");
+        Issue createdDbEntry = Optional.ofNullable(dbQueries.saveIssue()).orElseThrow(ThrowsWhenIssue.isNotPresent);
+
         //testing the service here
-        issueService.deleteById(createdDbEntry.get().getId());
+        issueService.deleteById(createdDbEntry.getId());
 
         //assert deletion was successfull by sql
-        int deletedId = createdDbEntry.get().getId();
+        int deletedId = createdDbEntry.getId();
         dbQueries.assertNotFoundInDb(deletedId);
     }
 
     @Test
     public void testUpdateIssue() {
-        Optional<Issue> savedissue = Optional.ofNullable(dbQueries.saveIssue());
-        if(savedissue.isPresent()){
-            Issue issue = savedissue.get();
-            int idOfIssue = issue.getId();
-            Issue newIssue = IssuePOJO.issueGenerator();
-            newIssue.setId(idOfIssue);
-            Optional<Issue> foundIssue = Optional.ofNullable(issueService.updateById(idOfIssue, newIssue));
-            if(foundIssue.isPresent()){
-                assertTrue(foundIssue.get().equals(newIssue));
-                dbQueries.deleteFromDbAndAssertDeletionSuccessful(idOfIssue);
-            }
-        }
+        Issue savedissue = Optional.ofNullable(dbQueries.saveIssue()).orElseThrow(ThrowsWhenIssue.isNotPresent);
+
+        int idOfIssue = savedissue.getId();
+        Issue newIssue = IssuePOJO.issueGenerator();
+        newIssue.setId(idOfIssue);
+
+        //updatebyid throws if unsuccessful
+        Issue foundIssue = issueService.updateById(idOfIssue, newIssue);
+
+        assertTrue(foundIssue.equals(newIssue));
+        dbQueries.deleteFromDbAndAssertDeletionSuccessful(idOfIssue);
+
+
     }
     @AfterEach
     public void tearDown(){

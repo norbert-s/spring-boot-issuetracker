@@ -5,6 +5,7 @@ import com.issuetracker.dataJpa.entity.Issue;
 import com.issuetracker.helpers.MessagesOnFailingAssertions;
 import com.issuetracker.helpers.issue_object_generator.IssuePOJO;
 import com.issuetracker.helpers.sql_queries.DatabaseQueries;
+import com.issuetracker.tests.exceptions.ThrowsWhenIssue;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,40 +45,40 @@ public class DaoLayerDatabaseIntegrationTest {
     @Test
     public void testSaveIssueByDao() {
         //testing saving issue service
-        Optional<Issue> createdDbEntry = Optional.ofNullable(issueDao.save(testIssue));
-        log.info(String.valueOf(createdDbEntry.get()));
-        assertTrue(createdDbEntry.get().equalsWithoutCheckingId(testIssue), MessagesOnFailingAssertions.getTwoObjectsDoNotEqual());
+        Issue createdDbEntry = Optional.ofNullable(issueDao.save(testIssue)).orElseThrow(ThrowsWhenIssue.isNotPresent);
+        log.info(String.valueOf(createdDbEntry));
+        assertTrue(createdDbEntry.equalsWithoutCheckingId(testIssue), MessagesOnFailingAssertions.getTwoObjectsDoNotEqual());
 
 
         //deleting issue by sql
-        int deletedId = createdDbEntry.get().getId();
+        int deletedId = createdDbEntry.getId();
         dbQueries.deleteFromDbAndAssertDeletionSuccessful(deletedId);
     }
 
     @Test
     public void testFindIssueByIdByDao() {
         //saving by sql
-        Optional<Issue> createdDbEntry = Optional.ofNullable(dbQueries.saveIssue());
+        Issue createdDbEntry = Optional.ofNullable(dbQueries.saveIssue()).orElseThrow(ThrowsWhenIssue.isNotPresent);
 
-        //testing the service here
-        Optional<Issue> foundIssue = Optional.ofNullable(issueDao.findById(createdDbEntry.get().getId()));
-        assertTrue(createdDbEntry.get().equalsWithoutCheckingId(foundIssue.get()),MessagesOnFailingAssertions.getTwoObjectsDoNotEqual());
+        //testing dao layer here
+        Issue foundIssue = Optional.ofNullable(issueDao.findById(createdDbEntry.getId())).orElseThrow(ThrowsWhenIssue.isNotPresent);
+        assertTrue(createdDbEntry.equalsWithoutCheckingId(foundIssue),MessagesOnFailingAssertions.getTwoObjectsDoNotEqual());
 
         //deleting issue by sql
-        int deletedId = createdDbEntry.get().getId();
+        int deletedId = createdDbEntry.getId();
         dbQueries.deleteFromDbAndAssertDeletionSuccessful(deletedId);
     }
 
     @Test
     public void testDeleteIssueByDao() {
         //saving by sql
-        Optional<Issue> createdDbEntry = Optional.ofNullable(dbQueries.saveIssue());
-        log.info(createdDbEntry.isPresent()?  createdDbEntry.get().toString() :" warning - not found");
+        Issue createdDbEntry = Optional.ofNullable(dbQueries.saveIssue()).orElseThrow(ThrowsWhenIssue.isNotPresent);
+
         //testing the service here
-        issueDao.deleteById(createdDbEntry.get().getId());
+        issueDao.deleteById(createdDbEntry.getId());
 
         //assert deletion was successfull by sql
-        int deletedId = createdDbEntry.get().getId();
+        int deletedId = createdDbEntry.getId();
         dbQueries.assertNotFoundInDb(deletedId);
     }
     @AfterEach
