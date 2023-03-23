@@ -5,6 +5,7 @@ import com.issuetracker.dataJpa.exceptionhandling.ErrorResponse;
 import com.issuetracker.helpers.config.MyTestConfig;
 import com.issuetracker.helpers.issue_object_generator.IssuePOJO;
 import com.issuetracker.helpers.sql_queries.DatabaseQueries;
+import com.issuetracker.tests.exceptions.ThrowsWhenIssue;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,24 +55,20 @@ public class RealEndPointDatabaseIntegrationTest {
 
     @Test
     public void returningIssueByIdEndpoint() {
-        Optional<Issue> createdIssue = Optional.ofNullable(dbQueries.saveIssue());
-        if (createdIssue.isPresent()) {
-            ResponseEntity<Issue> responseEntity = restTemplate.exchange(
-                    protocol + hostName + ":" + serverPort + "/api/issues/{id}",
-                    HttpMethod.GET,
-                    null,
-                    Issue.class,
-                    createdIssue.get().getId()
-            );
+        Issue createdIssue = Optional.ofNullable(dbQueries.saveIssue()).orElseThrow(ThrowsWhenIssue.isNotPresent);
 
-            Optional<Issue> foundIssue = Optional.ofNullable(responseEntity.getBody());
-            assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-            assertTrue(foundIssue.get().equalsWithoutCheckingId(createdIssue.get()));
-            dbQueries.deleteFromDbAndAssertDeletionSuccessful(createdIssue.get().getId());
-        } else {
-            throw new RuntimeException("issue is not present");
-        }
+        ResponseEntity<Issue> responseEntity = restTemplate.exchange(
+                protocol + hostName + ":" + serverPort + "/api/issues/{id}",
+                HttpMethod.GET,
+                null,
+                Issue.class,
+                createdIssue.getId()
+        );
 
+        Issue foundIssue = Optional.ofNullable(responseEntity.getBody()).orElseThrow(ThrowsWhenIssue.isNotPresent);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertTrue(foundIssue.equalsWithoutCheckingId(createdIssue));
+        dbQueries.deleteFromDbAndAssertDeletionSuccessful(createdIssue.getId());
     }
 
     @Test
@@ -121,7 +118,7 @@ public class RealEndPointDatabaseIntegrationTest {
     @Test
     public void notFound() {
         ResponseEntity<Issue> response = restTemplate.exchange(
-        		protocol + hostName + ":" + serverPort + "/api/issues1",
+                protocol + hostName + ":" + serverPort + "/api/issues1",
                 HttpMethod.GET,
                 null,
                 Issue.class);
@@ -154,8 +151,8 @@ public class RealEndPointDatabaseIntegrationTest {
     @Test
     public void updateIssue() {
         //save an issue to db
-        Optional<Issue> savedIssue = Optional.ofNullable(dbQueries.saveIssue());
-        int idToFind = savedIssue.get().getId();
+        Issue savedIssue = Optional.ofNullable(dbQueries.saveIssue()).orElseThrow(ThrowsWhenIssue.isNotPresent);
+        int idToFind = savedIssue.getId();
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "application/json");
@@ -173,8 +170,8 @@ public class RealEndPointDatabaseIntegrationTest {
         );
 
         //find the new issue
-        Optional<Issue> foundIssue = Optional.ofNullable(dbQueries.findIssueById(idToFind));
-        assertTrue(foundIssue.get().equals(testIssue));
+        Issue foundIssue = Optional.ofNullable(dbQueries.findIssueById(idToFind)).orElseThrow(ThrowsWhenIssue.isNotPresent);
+        assertTrue(foundIssue.equals(testIssue));
 
         //delete the issue
         dbQueries.deleteFromDbAndAssertDeletionSuccessful(idToFind);
