@@ -2,10 +2,9 @@ name: Docker Build and Test
 
 on:
   workflow_dispatch:
-  push:
   pull_request:
     branches:
-      - main
+      - master
 
 jobs:
   build-and-test:
