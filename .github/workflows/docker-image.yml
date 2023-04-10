@@ -2,12 +2,12 @@ name: Docker Build and Test
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - build-docker-image
   pull_request:
-    branches:
-      - main
+    types:
+      - opened
+      - synchronize
+    paths-ignore:
+      - 'README.md'
 
 jobs:
   build-and-test:
