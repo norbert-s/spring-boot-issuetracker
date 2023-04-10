@@ -5,7 +5,7 @@ import com.issuetracker.dataJpa.exceptionhandling.ErrorResponse;
 import com.issuetracker.helpers.config.MyTestConfig;
 import com.issuetracker.helpers.issue_object_generator.IssuePOJO;
 import com.issuetracker.helpers.sql_queries.DatabaseQueries;
-import com.issuetracker.tests.exceptions.ThrowsWhenIssue;
+import com.issuetracker.helpers.exceptions.ThrowsWhenIssue;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +18,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.Optional;
@@ -25,12 +26,13 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, properties = {"server.port=5005"})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, properties = {"server.port=${test.server.port}"})
 @Import(MyTestConfig.class)
-@TestPropertySource("/dev.properties")
+@TestPropertySource("/${environmentParam}.properties")
 @Tag("sanity")
 @Tag("real-endpoint")
 @Slf4j
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class RealEndPointDatabaseIntegrationTest {
     //private static final Logger LOGGER = LogManager.getLogger(RealEndPointDatabaseIntegrationTest.class);
 

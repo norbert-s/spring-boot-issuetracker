@@ -16,6 +16,8 @@
     <properties>
         <java.version>11</java.version>
         <groups>sanity</groups>
+        <environment>dev</environment>
+        <test.server.port>5005</test.server.port>
     </properties>
     <packaging>jar</packaging>
     <dependencies>
@@ -75,6 +77,12 @@
         </dependency>
 
 
+    
+<!--      <dependency>-->
+<!--        <groupId>org.springframework</groupId>-->
+<!--        <artifactId>spring-test</artifactId>-->
+<!--        <version>5.1.9.RELEASE</version>-->
+<!--      </dependency>-->
     </dependencies>
 
     <build>
@@ -110,10 +118,11 @@
                     </statelessTestsetReporter>
                     <systemPropertyVariables>
                         <groupsParam>${groups}</groupsParam>
+                        <environmentParam>${environment}</environmentParam>
+                        <test.server.port>${test.server.port}</test.server.port>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-
 </project>
