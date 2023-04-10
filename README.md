@@ -1,9 +1,9 @@
 # spring-boot-issuetracker
 
-UP NEXT
 
+When pushing to a branch then a docker image is being built, pushed to docker hub, tehn pulled and connected to and all the sanity tests are running against the newly built image.
+If the tests fail then its not possible to accept the pull request
 
-Will be creating tests to check the exceptions in isolation. Currently they are only checked in integration. 
 
 ----------------------------------------------------------------------
 Information about the repo
