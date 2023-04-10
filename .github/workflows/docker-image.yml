@@ -37,7 +37,7 @@ jobs:
       run: docker build -t  norbertsu/springboot-issuetracker:latest .
 
     - name: Run Docker container (MySQL)
-      run: docker run --name mysqldb -e MYSQL_DATABASE=book_store -e MYSQL_ROOT_PASSWORD=root -e MYSQL_USER=student -e MYSQL_PASSWORD=student -p 3306:3306 -d mysql:5.7
+      run: docker run --name mysqldb -e MYSQL_DATABASE=book_store -e MYSQL_ROOT_PASSWORD=root -e MYSQL_USER=tester -e MYSQL_PASSWORD=tester -p 3306:3306 -d mysql:5.7
 
     - name: Run Docker container (App)
       run: docker run --name app --link mysqldb -p 8080:8080 -d norbertsu/springboot-issuetracker:latest
