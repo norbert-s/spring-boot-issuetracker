@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Docker Build and Test
 
 on:
   workflow_dispatch:
@@ -29,6 +29,9 @@ jobs:
         path: ~/.m2
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
+
+    - name: Build JAR file
+      run: mvn clean package -DskipTests
 
     - name: Build Docker image
       run: docker build -t  norbertsu/springboot-issuetracker:latest .
