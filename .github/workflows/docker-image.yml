@@ -37,7 +37,7 @@ jobs:
       run: docker build -t  norbertsu/springboot-issuetracker:latest .
 
     - name: Run Docker container (MySQL)
-      run: docker run --name mysqldb -e MYSQL_DATABASE=pipeline_issue_tracker -e MYSQL_ROOT_PASSWORD=root -e MYSQL_USER=tester -e MYSQL_PASSWORD=tester -p 3306:3306 -d mysql:5.7
+      run: docker run --name mysqldb -e MYSQL_DATABASE=issue_tracker -e MYSQL_ROOT_PASSWORD=root -e MYSQL_USER=tester -e MYSQL_PASSWORD=tester -p 3306:3306 -d mysql:5.7
 
 
     - name: Run Docker container (App)
@@ -53,7 +53,7 @@ jobs:
         done
 
     - name: Run tests
-      run: mvn test
+      run: mvn test -Denvironment=pipeline
 
     - name: Stop and remove Docker containers
       if: always()
