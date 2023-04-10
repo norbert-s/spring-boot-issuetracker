@@ -49,7 +49,7 @@ jobs:
       run: docker build -t norbertsu/springboot-issuetracker:latest .
 
     - name: Run Docker container (App)
-      run: docker run --name app --link mysqldb -p 8080:8080 -d norbertsu/springboot-issuetracker:latest
+      run: docker run --name app -p 8080:8080 -d norbertsu/springboot-issuetracker:latest
 
     - name: Run tests
       run: mvn test -Denvironment=pipeline
