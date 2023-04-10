@@ -53,7 +53,7 @@ jobs:
         done
 
     - name: Run tests
-      run: mvn test -Denvironment=pipeline
+      run: mvn test --batch-mode --fail-at-end -Denvironment=pipeline
 
     - name: Stop and remove Docker containers
       if: always()
