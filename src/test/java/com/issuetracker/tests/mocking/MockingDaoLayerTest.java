@@ -11,16 +11,19 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
-@TestPropertySource("/dev.properties")
+@TestPropertySource("/${environmentParam}.properties")
 @SpringBootTest
 @Tag("mocking-controllers")
 @Tag("sanity")
+@Tag("pipeline")
 @Slf4j
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class MockingDaoLayerTest {
 
     @Autowired

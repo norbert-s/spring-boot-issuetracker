@@ -1,4 +1,4 @@
-package com.issuetracker.tests.exceptions;
+package com.issuetracker.helpers.exceptions;
 
 public class MessagesOnFail {
     public static String getTwoObjectsAreNotEqual(){

@@ -5,7 +5,7 @@ import com.issuetracker.dataJpa.entity.Issue;
 import com.issuetracker.helpers.MessagesOnFailingAssertions;
 import com.issuetracker.helpers.issue_object_generator.IssuePOJO;
 import com.issuetracker.helpers.sql_queries.DatabaseQueries;
-import com.issuetracker.tests.exceptions.ThrowsWhenIssue;
+import com.issuetracker.helpers.exceptions.ThrowsWhenIssue;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,18 +13,19 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@TestPropertySource("/dev.properties")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, properties = {"server.port= "})
+@TestPropertySource("/${environmentParam}.properties")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, properties = {"server.port=${test.server.port}"})
 @Tag("db_integration_tests")
 @Tag("sanity")
 @Slf4j
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class DaoLayerDatabaseIntegrationTest {
     //private static final Logger LOGGER = LogManager.getLogger(DaoLayerDatabaseIntegrationTest.class);
 

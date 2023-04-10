@@ -39,7 +39,7 @@ public class IssueExceptionHandler {
         errorResponse.setMessage(ex.getMessage());
         errorResponse.setTimestamp(System.currentTimeMillis());
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)

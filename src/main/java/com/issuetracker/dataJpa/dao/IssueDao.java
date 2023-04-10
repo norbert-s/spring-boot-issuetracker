@@ -7,5 +7,4 @@ public interface IssueDao extends JpaRepository<Issue, Integer> {
     public void deleteById(int id);
 
     public Issue findById(int id);
-
 }
