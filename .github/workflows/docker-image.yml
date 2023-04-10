@@ -2,28 +2,16 @@ name: Docker Build and Test
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - build-docker-image
   pull_request:
-    types:
-      - opened
-      - synchronize
-    paths-ignore:
-      - 'README.md'
+    branches:
+      - main
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
-    services:
-      mysqldb:
-        image: mysql:5.7
-        env:
-          MYSQL_DATABASE: issue_tracker
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_USER: tester
-          MYSQL_PASSWORD: tester
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
 
     steps:
     - name: Checkout repository
@@ -46,16 +34,30 @@ jobs:
       run: mvn clean package -DskipTests
 
     - name: Build Docker image
-      run: docker build -t norbertsu/springboot-issuetracker:latest .
+      run: docker build -t  norbertsu/springboot-issuetracker:latest .
+
+    - name: Run Docker container (MySQL)
+      run: docker run --name mysqldb -e MYSQL_DATABASE=issue_tracker -e MYSQL_ROOT_PASSWORD=root -e MYSQL_USER=tester -e MYSQL_PASSWORD=tester -p 3306:3306 -d mysql:5.7
+
 
     - name: Run Docker container (App)
-      run: docker run --name app -p 8080:8080 -d norbertsu/springboot-issuetracker:latest
+      run: docker run --name app --link mysqldb -p 8080:8080 -d norbertsu/springboot-issuetracker:latest
+
+    - name: Wait for MySQL to be ready
+      run: |
+        for i in {1..30}; do
+          if docker exec mysqldb mysqladmin ping --silent; then
+            break
+          fi
+          sleep 1
+        done
 
     - name: Run tests
       run: mvn test -Denvironment=pipeline
 
-    - name: Stop and remove Docker container (App)
+    - name: Stop and remove Docker containers
       if: always()
       run: |
-        docker stop app
-        docker rm app
+        docker stop app mysqldb
+        docker rm app mysqldb
+
