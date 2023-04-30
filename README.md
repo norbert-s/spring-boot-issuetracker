@@ -7,6 +7,10 @@ If the tests fail then its not possible to accept the pull request and the image
 
 
 ----------------------------------------------------------------------
+
+The app is not being deployed to heroku any more
+
+----------------------------------------------------------------------
 Information about the repo
 
 The app is unit tested - testing the service and dao layer methods in isolation by mocking, and integration/db integration tested, and the real endpoints are also tested.
