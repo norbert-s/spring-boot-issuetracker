@@ -2,6 +2,7 @@ version: '1'
 services:
   mysqldb:
     image: mysql:5.7
+    command: --default-authentication-plugin=mysql_native_password
     environment:
       MYSQL_DATABASE: issue_tracker
       MYSQL_ROOT_PASSWORD: root
@@ -10,7 +11,7 @@ services:
     restart: always
     networks:
       - issuetracker
-    ports: 
+    ports:
       - "3306"
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
@@ -18,6 +19,7 @@ services:
       retries: 20
     volumes:
       - datavolume:/var/lib/mysql
+
   app:
     build:
       context: .
