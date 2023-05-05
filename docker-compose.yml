@@ -18,9 +18,10 @@ services:
       retries: 20
     volumes:
       - datavolume:/var/lib/mysql
-
-
   app:
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: norbertsu/springboot-issuetracker:latest
     ports:
       - 8080:8080

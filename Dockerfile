@@ -1,4 +1,4 @@
-FROM openjdk:8
+FROM openjdk:11-jdk
 
 ADD target/issuetracker-0.0.1-SNAPSHOT.jar issuetracker-0.0.1-SNAPSHOT.jar
 
