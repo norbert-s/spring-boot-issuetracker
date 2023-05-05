@@ -3,10 +3,10 @@ services:
   mysqldb:
     image: mysql:5.7
     environment:
-      MYSQL_DATABASE: book_store
+      MYSQL_DATABASE: issue_tracker
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_USER: student
-      MYSQL_PASSWORD: student
+      MYSQL_USER: tester
+      MYSQL_PASSWORD: tester
     restart: always
     networks:
       - issuetracker
