@@ -65,7 +65,7 @@ jobs:
 
     - name: Tag Docker image for Heroku
       run: |
-        docker tag norbertsu/springboot-issuetracker:latest registry.heroku.com/myapp/web
+        docker tag norbertsu/springboot-issuetracker:latest registry.heroku.com/spring-boot-issue-tracker/web
 
     - name: Push Docker image to Heroku
       run: |
