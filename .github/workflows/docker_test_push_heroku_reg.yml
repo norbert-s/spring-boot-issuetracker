@@ -1,4 +1,4 @@
-name: Docker Build Test Push to Dockerhub
+name: Docker Build Test Push to Dockerhub push to Heroku
 
 on:
   workflow_dispatch:
