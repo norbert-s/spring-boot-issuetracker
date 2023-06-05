@@ -69,11 +69,11 @@ jobs:
 
     - name: Push Docker image to Heroku
       run: |
-        docker push registry.heroku.com/myapp/web
+        docker push registry.heroku.com/spring-boot-issue-tracker/web
 
     - name: Release Docker image to Heroku
       run: |
-        heroku container:release web --app myapp
+        heroku container:release web --app spring-boot-issue-tracker
 
     - name: Stop and remove Docker containers
       if: always()
