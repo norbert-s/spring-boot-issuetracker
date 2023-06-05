@@ -1,0 +1,87 @@
+name: Docker Build Test Push to Dockerhub
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+
+    - name: Cache Maven packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+
+    - name: Build JAR file
+      run: mvn clean package -DskipTests
+
+    - name: Build Docker image
+      run: docker build -t norbertsu/springboot-issuetracker:latest .
+
+    - name: Run Docker container (MySQL)
+      run: docker run --name mysqldb -e MYSQL_DATABASE=issue_tracker -e MYSQL_ROOT_PASSWORD=root -e MYSQL_USER=tester -e MYSQL_PASSWORD=tester -p 3306:3306 -d mysql:5.7
+
+    - name: Run Docker container (App)
+      run: docker run --name app --link mysqldb -p 8080:8080 -d norbertsu/springboot-issuetracker:latest
+
+    - name: Wait for MySQL to be ready
+      run: |
+        for i in {1..30}; do
+          if docker exec mysqldb mysqladmin ping --silent; then
+            break
+          fi
+          sleep 1
+        done
+
+    - name: Run tests
+      run: mvn test --batch-mode --fail-at-end -Denvironment=pipeline
+
+    - name: Push Docker image
+      if: success()
+      run: |
+        echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+        docker tag norbertsu/springboot-issuetracker:latest norbertsu/springboot-issuetracker:${{ github.sha }}
+        docker push norbertsu/springboot-issuetracker:latest
+        docker push norbertsu/springboot-issuetracker:${{ github.sha }}
+
+    - name: Login to Heroku Container Registry
+      run: |
+        echo "${{ secrets.HEROKU_API_KEY }}" | docker login --username=_ --password-stdin registry.heroku.com
+
+    - name: Tag Docker image for Heroku
+      run: |
+        docker tag norbertsu/springboot-issuetracker:latest registry.heroku.com/myapp/web
+
+    - name: Push Docker image to Heroku
+      run: |
+        docker push registry.heroku.com/myapp/web
+
+    - name: Release Docker image to Heroku
+      run: |
+        heroku container:release web --app myapp
+
+    - name: Stop and remove Docker containers
+      if: always()
+      run: |
+        docker stop app mysqldb
+        docker rm app mysqldb
+    - name: Stop and remove Docker containers
+      if: always()
+      run: |
+        docker stop app mysqldb
+        docker rm app mysqldb
